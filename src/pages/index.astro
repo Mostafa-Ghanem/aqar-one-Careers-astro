@@ -1,0 +1,265 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import JobCard from '../components/JobCard.astro';
+import { SITE } from '../config';
+import { getCollection } from 'astro:content';
+
+const jobs = await getCollection('jobs');
+const depts = ['All', ...new Set(jobs.map((j) => j.data.dept))];
+
+const faqs = [
+  { q: 'How do I apply?', a: 'Open the role page and submit the application form with your CV (PDF preferred). You can also email hr@aqar1.com with the role code in the subject line.' },
+  { q: 'How long does the hiring process take?', a: 'Typically two to three weeks from application to offer: screening call within a few days, then on-site interviews, then a written offer.' },
+  { q: 'Are roles on-site or remote?', a: "Our roles are on-site at our Jeddah offices (Al-Safa or Obhur Al-Shamaliyah), unless the role page states otherwise." },
+  { q: 'Can I apply if no role matches my profile?', a: 'Yes — send your CV to hr@aqar1.com with a short note on where you would add value. We keep strong profiles on file and reach out when a matching role opens.' },
+];
+
+const steps = [
+  { t: 'Apply online', d: 'Submit your CV through the role page. We confirm receipt within one business day.' },
+  { t: 'Screening call', d: 'A 20–30 minute call with HR to align on experience, expectations, and fit.' },
+  { t: 'Interviews', d: 'On-site interviews with leadership, including a practical case relevant to the role.' },
+  { t: 'Offer & onboarding', d: 'A written offer, then a structured onboarding plan for your first 90 days.' },
+];
+---
+<BaseLayout
+  title="Careers at Aqar One — Real Estate Jobs in Jeddah"
+  description="Join Aqar One — a Class A licensed Saudi real estate group in Jeddah, since 2011. Explore open roles in sales, marketing, and operations."
+>
+  <!-- Hero -->
+  <section class="section hero grid-backdrop">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow">Careers · Jeddah, Saudi Arabia</div>
+        <h1 class="display">Shape the future of real estate with us.</h1>
+        <p class="body-lg muted">
+          Since 2011, Aqar One has grown into one of Jeddah's most trusted real estate groups —
+          licensed across six services by the Real Estate General Authority and rated Class "A" across Saudi Arabia.
+        </p>
+        <div class="hero-ctas">
+          <a href="#roles" class="btn btn-primary">Explore open roles</a>
+          <a href="#why" class="btn btn-secondary">Why join Aqar One</a>
+        </div>
+      </div>
+      <div class="seal" aria-label='Class A — Judicial Sale Agent'>
+        <div class="seal-a">A</div>
+        <div class="seal-text">Class A · Judicial Sale Agent</div>
+      </div>
+    </div>
+    <div class="container">
+      <dl class="stats">
+        <div><dt>2011</dt><dd>Operating since</dd></div>
+        <div><dt>Class "A"</dt><dd>REGA rating, Kingdom-wide</dd></div>
+        <div><dt>6</dt><dd>Licensed real estate services</dd></div>
+        <div><dt>2</dt><dd>Offices in Jeddah</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Why join -->
+  <section id="why" class="section alt">
+    <div class="container">
+      <div class="eyebrow sec-eyebrow">01 — Why Aqar One</div>
+      <h2 class="h2 sec-title">A licensed, accredited platform for serious careers.</h2>
+      <div class="values">
+        <div class="card">
+          <div class="icon-tile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8z"/></svg>
+          </div>
+          <h3 class="h3">Accredited credibility</h3>
+          <p class="body-sm muted">Classified by the Real Estate General Authority across Ejar, brokerage, marketing, Mullak, facility management, and Sakani financing guidance — and accredited as a judicial sale agent by the Ministry of Justice.</p>
+        </div>
+        <div class="card">
+          <div class="icon-tile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V8l6-4 6 4v13"/><path d="M10 21v-5h4v5"/></svg>
+          </div>
+          <h3 class="h3">Real ownership</h3>
+          <p class="body-sm muted">We are building departments, not just filling seats. Leaders here design structures, set policies, and own outcomes end to end — with direct access to decision-makers.</p>
+        </div>
+        <div class="card">
+          <div class="icon-tile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+          </div>
+          <h3 class="h3">Sustainable growth</h3>
+          <p class="body-sm muted">Fifteen years of steady growth in Jeddah's market. Your work compounds: measurable KPIs, weekly reviews, and continuous improvement are how we operate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open roles -->
+  <section id="roles" class="section">
+    <div class="container">
+      <div class="eyebrow sec-eyebrow">02 — Open Roles</div>
+      <div class="roles-head">
+        <h2 class="h2">Current opportunities</h2>
+        <span class="code" data-role-count>{jobs.length} open position{jobs.length === 1 ? '' : 's'}</span>
+      </div>
+      <div class="filters" role="group" aria-label="Filter by department">
+        {depts.map((d, i) => (
+          <button class="chip chip-btn" aria-pressed={i === 0 ? 'true' : 'false'} data-filter={d}>{d}</button>
+        ))}
+      </div>
+      <div class="roles-grid" data-roles>
+        {jobs.map((j) => (
+          <JobCard
+            slug={j.id}
+            title={j.data.title}
+            dept={j.data.dept}
+            code={j.data.code}
+            location={j.data.location.split(',')[0]}
+            type={j.data.type}
+            mode={j.data.mode}
+            summary={j.data.summary}
+            open={j.data.open}
+          />
+        ))}
+      </div>
+      <div class="no-roles" data-empty hidden>
+        No open roles in this department right now — check back soon or send your CV to
+        <a href={`mailto:${SITE.hrEmail}`}>{SITE.hrEmail}</a>.
+      </div>
+    </div>
+  </section>
+
+  <!-- Hiring process -->
+  <section id="process" class="section alt bordered">
+    <div class="container">
+      <div class="eyebrow sec-eyebrow">03 — Hiring Process</div>
+      <h2 class="h2 sec-title">Four clear steps. No surprises.</h2>
+      <ol class="steps">
+        {steps.map((s, i) => (
+          <li>
+            <div class="step-num">{String(i + 1).padStart(2, '0')}</div>
+            <h4 class="h4">{s.t}</h4>
+            <p class="body-sm muted">{s.d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section">
+    <div class="container narrow">
+      <div class="eyebrow sec-eyebrow">04 — FAQ</div>
+      <h2 class="h2 sec-title">Frequently asked questions</h2>
+      {faqs.map((f) => (
+        <details class="faq-item">
+          <summary><span class="h4">{f.q}</span><span class="plus" aria-hidden="true">+</span></summary>
+          <p class="muted">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- CTA strip -->
+  <section class="cta-strip">
+    <div class="container cta-inner">
+      <div>
+        <h2 class="h2 on-dark">Don't see your role?</h2>
+        <p class="cta-sub">We're always looking for exceptional people. Send your CV and tell us where you'd fit.</p>
+      </div>
+      <a href={`mailto:${SITE.hrEmail}`} class="btn btn-primary">Email {SITE.hrEmail}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Department filter
+  const chips = document.querySelectorAll('[data-filter]');
+  const cards = document.querySelectorAll('[data-roles] [data-dept]');
+  const empty = document.querySelector('[data-empty]');
+  const count = document.querySelector('[data-role-count]');
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      const f = chip.dataset.filter;
+      let visible = 0;
+      cards.forEach((card) => {
+        const show = f === 'All' || card.dataset.dept === f;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      empty.hidden = visible > 0;
+      count.textContent = `${visible} open position${visible === 1 ? '' : 's'}`;
+    });
+  });
+</script>
+
+<style>
+  .alt { background: var(--surface-alt); }
+  .bordered { border-block: 1px solid var(--line); }
+  .sec-eyebrow { margin-bottom: var(--space-4); }
+  .sec-title { margin-bottom: var(--space-7); max-width: 720px; }
+  .narrow { max-width: 720px; }
+
+  /* Hero */
+  .hero { border-bottom: 1px solid var(--line); }
+  .hero-grid { display: grid; grid-template-columns: 1fr auto; gap: var(--space-7); align-items: center; }
+  .hero-copy { max-width: 720px; display: flex; flex-direction: column; gap: var(--space-5); }
+  .hero-copy .body-lg { margin: 0; max-width: 60ch; }
+  .hero-ctas { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+  .seal {
+    width: 132px; height: 132px; border-radius: 50%;
+    background: var(--bronze-tint); border: 1px solid var(--bronze-ring);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: var(--space-1); text-align: center; box-shadow: var(--shadow-1);
+  }
+  .seal-a { font-family: var(--font-display); font-size: 2rem; font-weight: 600; color: var(--bronze-deep); line-height: 1; }
+  .seal-text { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze-deep); line-height: 1.4; max-width: 96px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); border-top: 1px solid var(--line-strong); padding-top: var(--space-6); margin: var(--space-8) 0 0; }
+  .stats dt { font-family: var(--font-display); font-size: 2.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stats dd { margin: var(--space-1) 0 0; font-size: 0.9375rem; color: var(--ink-2); }
+
+  /* Values */
+  .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .values .card { padding: var(--space-6); }
+  .icon-tile {
+    width: 44px; height: 44px; border-radius: var(--radius-btn);
+    background: var(--bronze-tint); border: 1px solid var(--bronze-ring); color: var(--bronze-deep);
+    display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-5);
+  }
+  .values .h3 { margin-bottom: var(--space-3); }
+  .values p { margin: 0; }
+
+  /* Roles */
+  .roles-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-6); }
+  .filters { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-6); }
+  .roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--space-5); }
+  .no-roles { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-card); padding: var(--space-7); text-align: center; color: var(--ink-3); font-size: 0.9375rem; }
+  .no-roles a { font-weight: 600; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
+  .steps li { border-top: 2px solid var(--bronze); padding-top: var(--space-5); }
+  .step-num { font-family: var(--font-mono); font-size: 1.125rem; font-weight: 500; color: var(--bronze); margin-bottom: var(--space-3); font-variant-numeric: tabular-nums; }
+  .steps h4 { margin-bottom: var(--space-2); }
+  .steps p { margin: 0; }
+
+  /* FAQ */
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-item summary {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+    padding-block: 20px; cursor: pointer; list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .plus { font-family: var(--font-display); font-size: 1.5rem; color: var(--bronze-deep); transition: transform 200ms ease; }
+  .faq-item[open] .plus { transform: rotate(45deg); }
+  .faq-item p { margin: 0; padding-bottom: 20px; max-width: 68ch; }
+
+  /* CTA strip */
+  .cta-strip { background: var(--espresso); padding-block: var(--space-8); }
+  .cta-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
+  .on-dark { color: var(--ink-on-dark); margin-bottom: var(--space-2); }
+  .cta-sub { color: var(--ink-on-dark-2); margin: 0; }
+
+  @media (max-width: 1023px) {
+    .values, .steps { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .seal { width: 96px; height: 96px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .values, .steps { grid-template-columns: 1fr; }
+  }
+</style>

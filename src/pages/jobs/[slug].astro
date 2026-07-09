@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ApplyForm from '../../components/ApplyForm.astro';
+import { SITE } from '../../config';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const jobs = await getCollection('jobs');
+  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
+}
+
+const { job } = Astro.props;
+const { Content } = await render(job);
+const d = job.data;
+
+// SEO: Google Jobs structured data
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'JobPosting',
+  title: d.title,
+  description: d.summary,
+  identifier: { '@type': 'PropertyValue', name: SITE.name, value: d.code },
+  datePosted: d.datePosted,
+  employmentType: d.type.toUpperCase().replace('-', '_'),
+  hiringOrganization: { '@type': 'Organization', name: SITE.name, sameAs: SITE.mainSite },
+  jobLocation: {
+    '@type': 'Place',
+    address: { '@type': 'PostalAddress', addressLocality: 'Jeddah', addressCountry: 'SA' },
+  },
+  applicantLocationRequirements: { '@type': 'Country', name: 'Saudi Arabia' },
+};
+---
+<BaseLayout
+  title={`${d.title} — Careers at Aqar One`}
+  description={`Aqar One is hiring: ${d.title} in ${d.location}. ${d.type}, ${d.mode}. Apply now.`}
+  jsonLd={jsonLd}
+>
+  <!-- Job hero -->
+  <section class="job-hero grid-backdrop">
+    <div class="container">
+      <div class="hero-meta">
+        <span class="eyebrow">{d.dept} · {d.code}</span>
+        <span class={`badge ${d.open ? 'badge-open' : 'badge-closing'}`}>{d.open ? 'Open' : 'Closing soon'}</span>
+      </div>
+      <h1 class="display job-title">{d.title}</h1>
+      <div class="hero-chips">
+        <span class="chip solid">{d.location}</span>
+        <span class="chip solid">{d.type}</span>
+        <span class="chip solid">{d.mode}</span>
+        {d.experience && <span class="chip solid">{d.experience}</span>}
+      </div>
+    </div>
+  </section>
+
+  <!-- Body -->
+  <section class="job-body">
+    <div class="container body-grid">
+      <article>
+        <h2 class="sub-h2">About the role</h2>
+        <div class="body-lg muted about"><Content /></div>
+
+        <h2 class="sub-h2">Key responsibilities</h2>
+        <ol class="resp-list">
+          {d.responsibilities.map((r, i) => (
+            <li>
+              <span class="resp-num">{String(i + 1).padStart(2, '0')}</span>
+              <span>{r}</span>
+            </li>
+          ))}
+        </ol>
+
+        <h2 class="sub-h2">Requirements</h2>
+        <ul class="req-list">
+          {d.requirements.map((r) => <li>{r}</li>)}
+        </ul>
+
+        <ApplyForm jobTitle={d.title} jobCode={d.code} />
+      </article>
+
+      <aside class="card summary-card">
+        <div class="code sum-code">{d.code}</div>
+        <div class="sum-row"><span>Department</span><strong>{d.dept}</strong></div>
+        <div class="sum-row"><span>Location</span><strong>{d.location.split(',')[0]}, KSA</strong></div>
+        <div class="sum-row"><span>Type</span><strong>{d.type} · {d.mode}</strong></div>
+        {d.experience && <div class="sum-row"><span>Experience</span><strong>{d.experience}</strong></div>}
+        <a href="#apply" class="btn btn-primary sum-btn">Apply for this role</a>
+        <a href={`mailto:${SITE.hrEmail}?subject=Application%20${d.code}`} class="btn btn-secondary sum-btn-2">Email your CV</a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .job-hero { padding-block: var(--space-8) var(--space-7); border-bottom: 1px solid var(--line); }
+  .hero-meta { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .job-title { font-size: clamp(2.2rem, 4vw, 3.5rem); max-width: 20ch; margin-bottom: var(--space-5); }
+  .hero-chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .chip.solid { background: var(--surface); border-color: var(--line-strong); padding: 6px 16px; }
+
+  .job-body { padding-block: var(--space-8) var(--space-9); }
+  .body-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--space-8); align-items: start; }
+  article { max-width: 72ch; }
+
+  .sub-h2 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: 0 0 var(--space-5); }
+  .about { margin-bottom: var(--space-7); }
+  .about :global(p) { margin: 0; }
+
+  .resp-list { list-style: none; margin: 0 0 var(--space-7); padding: 0; }
+  .resp-list li { display: flex; gap: var(--space-4); align-items: baseline; padding-block: var(--space-3); border-bottom: 1px solid var(--line); }
+  .resp-num { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--bronze); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+  .req-list { list-style: none; margin: 0 0 var(--space-7); padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .req-list li { display: flex; gap: var(--space-3); align-items: baseline; }
+  .req-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--bronze); flex-shrink: 0; }
+
+  .summary-card { position: sticky; top: 96px; }
+  .sum-code { padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .sum-row { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: 14px; border-bottom: 1px solid var(--line); }
+  .sum-row span { font-size: 0.8125rem; font-weight: 600; color: var(--ink-3); }
+  .sum-row strong { font-size: 0.9375rem; font-weight: 600; }
+  .sum-btn { margin-top: var(--space-5); width: 100%; }
+  .sum-btn-2 { margin-top: var(--space-3); width: 100%; }
+
+  @media (max-width: 1023px) {
+    .body-grid { grid-template-columns: 1fr; }
+    .summary-card { position: static; order: -1; }
+  }
+</style>

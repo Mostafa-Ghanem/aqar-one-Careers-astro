@@ -1,0 +1,55 @@
+/* ============================================================
+   Aqar One Jobs — DESIGN TOKENS (single source of truth)
+   Edit here → every page updates. Values from DESIGN.md v1.0
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --canvas:        #F5EFE4;
+  --surface:       #FFFFFF;
+  --surface-alt:   #FBF7F0;
+  --espresso:      #2A2119;
+  --espresso-soft: #3A3026;
+
+  /* Ink */
+  --ink:           #211B15;
+  --ink-2:         #6B5F52;
+  --ink-3:         #9B8F80;
+  --ink-on-dark:   #F3ECE0;
+  --ink-on-dark-2: #B9AC9A;
+
+  /* Brand — Bronze */
+  --bronze:        #BE9170;
+  --bronze-deep:   #9A6F4F;
+  --bronze-tint:   #EFE3D6;
+  --bronze-ring:   #D9BFA6;
+
+  /* Support */
+  --line:          #E4DACB;
+  --line-strong:   #D3C4AF;
+  --olive:         #5E7355;
+  --olive-tint:    #E7ECE2;
+  --clay:          #A8583F;
+  --clay-tint:     #F3E2DB;
+  --focus:         #9A6F4F;
+
+  /* Typography */
+  --font-display:  "Fraunces", Georgia, serif;
+  --font-body:     "IBM Plex Sans Arabic", "Inter", system-ui, sans-serif;
+  --font-mono:     "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Spacing (4px base) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 96px; --space-10: 128px;
+
+  /* Radii */
+  --radius-btn: 10px;
+  --radius-card: 14px;
+  --radius-input: 10px;
+  --radius-chip: 999px;
+
+  /* Shadows (warm, brown-based) */
+  --shadow-1: 0 1px 2px rgba(42,33,25,.04), 0 2px 8px rgba(42,33,25,.05);
+  --shadow-2: 0 4px 12px rgba(42,33,25,.08), 0 12px 28px rgba(42,33,25,.08);
+  --shadow-3: 0 18px 48px rgba(42,33,25,.14);
+}

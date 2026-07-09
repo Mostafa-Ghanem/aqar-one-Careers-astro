@@ -1,0 +1,40 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  dept: string;
+  code: string;
+  location: string;
+  type: string;
+  mode: string;
+  summary: string;
+  open: boolean;
+}
+const { slug, title, dept, code, location, type, mode, summary, open } = Astro.props;
+---
+<a href={`/jobs/${slug}/`} class="card card-hover job-card" data-dept={dept}>
+  <div class="head">
+    <span class="eyebrow">{dept}</span>
+    <span class={`badge ${open ? 'badge-open' : 'badge-closing'}`}>{open ? 'Open' : 'Closing soon'}</span>
+  </div>
+  <h3 class="h3">{title}</h3>
+  <p class="body-sm muted summary">{summary}</p>
+  <div class="meta">
+    <span class="chip">{location}</span>
+    <span class="chip">{type}</span>
+    <span class="chip">{mode}</span>
+  </div>
+  <div class="foot">
+    <span class="code">{code}</span>
+    <span class="details">View details →</span>
+  </div>
+</a>
+
+<style>
+  .job-card { display: flex; flex-direction: column; gap: var(--space-4); color: var(--ink); }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .summary { margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .meta { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border-top: 1px solid var(--line); padding-top: var(--space-4); margin-top: var(--space-1); }
+  .details { font-size: 0.8125rem; font-weight: 600; color: var(--bronze-deep); }
+</style>
