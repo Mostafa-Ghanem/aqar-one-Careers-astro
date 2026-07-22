@@ -18,7 +18,7 @@ export const SITE = {
   applyEndpoint: envApplyEndpoint,
 
   application: {
-    maxCvBytes: 5 * 1024 * 1024,
+    maxCvBytes: 50 * 1024 * 1024,
     allowedCvExtensions: ['pdf', 'doc', 'docx'],
   },
 } as const;

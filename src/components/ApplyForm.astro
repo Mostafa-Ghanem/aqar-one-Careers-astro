@@ -56,7 +56,7 @@ const { jobTitle, jobCode } = Astro.props;
     </div>
 
     <div class="field span-2">
-      <label for="app-cv">CV / Resume (PDF, DOC, or DOCX — max 5 MB) *</label>
+      <label for="app-cv">CV / Resume (PDF, DOC, or DOCX — max 50 MB) *</label>
       <label class="dropzone" for="app-cv" data-dropzone>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -158,7 +158,7 @@ const { jobTitle, jobCode } = Astro.props;
 
     const validateFile = (file) => {
       if (!file) return 'Please attach your CV.';
-      if (file.size > maxCvBytes) return 'CV file is larger than 5 MB. Please upload a smaller file.';
+      if (file.size > maxCvBytes) return 'CV file is larger than 50 MB. Please upload a smaller file.';
       const extension = getExtension(file.name);
       if (!allowedCvExtensions.includes(extension)) return 'Please upload a PDF, DOC, or DOCX file.';
       return '';

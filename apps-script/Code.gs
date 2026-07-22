@@ -21,8 +21,8 @@ const SHEET_ID = '1P0r5sdt_PFQPP5y2fPQUILeGALS3whnUQmvAj_xiwas';
 const SHEET_NAME = 'Applications';
 const FOLDER_NAME = 'Aqar One — CVs';
 const NOTIFY_EMAIL = 'hr@aqar1.com'; // Set to '' to disable notifications.
-const MAX_CV_BYTES = 5 * 1024 * 1024;
-const MAX_BASE64_LENGTH = 7_100_000;
+const MAX_CV_BYTES = 50 * 1024 * 1024;
+const MAX_BASE64_LENGTH = 70_000_000;
 const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx'];
 
 
