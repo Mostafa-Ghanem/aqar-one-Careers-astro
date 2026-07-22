@@ -109,7 +109,7 @@ const steps = [
             title={j.data.title}
             dept={j.data.dept}
             code={j.data.code}
-            location={j.data.location.split(',')[0]}
+            location={(j.data.location || '').split(',')[0] || 'Jeddah'}
             type={j.data.type}
             mode={j.data.mode}
             summary={j.data.summary}
@@ -183,8 +183,8 @@ const steps = [
         card.style.display = show ? '' : 'none';
         if (show) visible++;
       });
-      empty.hidden = visible > 0;
-      count.textContent = `${visible} open position${visible === 1 ? '' : 's'}`;
+      if (empty) empty.hidden = visible > 0;
+      if (count) count.textContent = `${visible} open position${visible === 1 ? '' : 's'}`;
     });
   });
 </script>

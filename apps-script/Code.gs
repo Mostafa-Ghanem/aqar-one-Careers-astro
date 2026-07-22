@@ -94,8 +94,8 @@ function doPost(e) {
 
     return jsonOutput({ ok: true, submissionId: validated.submissionId });
   } catch (error) {
-    console.error(error && error.stack ? error.stack : error);
-    return jsonOutput({ ok: false, error: 'The application could not be saved.' });
+    const errorMsg = error && typeof error === 'object' && error.message ? String(error.message) : 'The application could not be saved.';
+    return jsonOutput({ ok: false, error: errorMsg });
   }
 }
 

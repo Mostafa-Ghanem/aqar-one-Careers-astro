@@ -1,4 +1,14 @@
-const envApplyEndpoint = (import.meta.env.PUBLIC_APPLY_ENDPOINT ?? '').trim();
+const rawEndpoint = (import.meta.env.PUBLIC_APPLY_ENDPOINT ?? '').trim();
+
+export const isValidApplyEndpoint = (url: string): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
 
 export const SITE = {
   name: 'Aqar One',
@@ -13,9 +23,8 @@ export const SITE = {
     "Ash Shera'a District, Prince Nayef St., Obhur Al-Shamaliyah, Jeddah",
   ],
 
-  // Recommended: set PUBLIC_APPLY_ENDPOINT in Cloudflare Pages.
-  // It must be the deployed Google Apps Script Web App URL ending in /exec.
-  applyEndpoint: envApplyEndpoint,
+  // PUBLIC_APPLY_ENDPOINT configured via Cloudflare Pages or .env
+  applyEndpoint: rawEndpoint,
 
   application: {
     maxCvBytes: 50 * 1024 * 1024,

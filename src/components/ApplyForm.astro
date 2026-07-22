@@ -181,24 +181,25 @@ const { jobTitle, jobCode } = Astro.props;
     };
 
     const isValidEndpoint = (value) => {
+      if (!value) return false;
       try {
-        const url = new URL(String(value || ''));
-        return url.protocol === 'https:' &&
-          (url.hostname === 'script.google.com' || url.hostname.endsWith('.googleusercontent.com'));
+        const url = new URL(String(value));
+        return url.protocol === 'https:' || url.protocol === 'http:';
       } catch {
         return false;
       }
     };
 
     const fileToBase64 = (file) => new Promise((resolve, reject) => {
+      if (!file) return reject(new Error('Please attach your CV.'));
       const reader = new FileReader();
       reader.onload = () => {
         const result = String(reader.result || '');
         const commaIndex = result.indexOf(',');
-        if (commaIndex < 0) reject(new Error('Unable to read CV file.'));
+        if (commaIndex < 0) reject(new Error('Unable to read the CV file content.'));
         else resolve(result.slice(commaIndex + 1));
       };
-      reader.onerror = () => reject(new Error('Unable to read CV file.'));
+      reader.onerror = () => reject(new Error('Failed to read the CV file from your device.'));
       reader.readAsDataURL(file);
     });
 
@@ -229,7 +230,7 @@ const { jobTitle, jobCode } = Astro.props;
       }
 
       if (!isValidEndpoint(endpoint)) {
-        showError(`Online applications are temporarily unavailable. Please email your CV to ${hrEmail}.`);
+        showError(`Online applications are temporarily unavailable. Please email your CV directly to ${hrEmail}.`);
         return;
       }
 
@@ -244,16 +245,17 @@ const { jobTitle, jobCode } = Astro.props;
 
       if (name.length < 2) return showError('Please enter your full name.');
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showError('Please enter a valid email address.');
-      if ((phone.match(/\d/g) || []).length < 8) return showError('Please enter a valid phone number.');
+      if ((phone.match(/\d/g) || []).length < 8) return showError('Please enter a valid phone number with digits.');
       if (!isValidLinkedIn(linkedin)) return showError('Please enter a valid LinkedIn profile URL.');
       if (fileError) return showError(fileError);
 
       setSubmitting(true);
 
       const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 45000);
+      const timeout = window.setTimeout(() => controller.abort(), 60000);
 
       try {
+        const cvData = await fileToBase64(cv);
         const payload = {
           submissionId: String(data.get('submissionId') || createSubmissionId()),
           job: String(data.get('job') || ''),
@@ -271,7 +273,7 @@ const { jobTitle, jobCode } = Astro.props;
           cvName: cv.name,
           cvType: cv.type || 'application/octet-stream',
           cvSize: cv.size,
-          cvData: await fileToBase64(cv),
+          cvData,
         };
 
         const response = await fetch(endpoint, {
@@ -284,17 +286,17 @@ const { jobTitle, jobCode } = Astro.props;
           signal: controller.signal,
         });
 
-        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+        if (!response.ok) throw new Error(`Server returned HTTP status ${response.status}`);
 
         const responseText = await response.text();
         let result;
         try {
           result = JSON.parse(responseText);
         } catch {
-          throw new Error('The application service returned an invalid response.');
+          throw new Error('The application service returned an invalid response format.');
         }
 
-        if (!result?.ok) throw new Error(result?.error || 'The application was not saved.');
+        if (!result?.ok) throw new Error(result?.error || 'The application could not be saved.');
 
         form.reset();
         if (fileLabel) fileLabel.textContent = 'Click to upload your CV';
@@ -303,11 +305,17 @@ const { jobTitle, jobCode } = Astro.props;
         successEl.focus({ preventScroll: true });
         successEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
       } catch (error) {
+        console.error('Submission failed:', error);
         const timedOut = error instanceof DOMException && error.name === 'AbortError';
+        const errMsg = error && typeof error === 'object' && 'message' in error ? String(error.message) : '';
+        const userFriendlyMsg = errMsg && !errMsg.includes('object') && !errMsg.includes('fetch')
+          ? errMsg
+          : null;
+
         showError(
           timedOut
-            ? `The request took too long. Please try again or email your CV to ${hrEmail}.`
-            : `We could not submit your application. Please try again or email your CV to ${hrEmail}.`,
+            ? `The request took too long to complete. Please try again or email your CV directly to ${hrEmail}.`
+            : userFriendlyMsg || `We could not submit your application. Please try again or email your CV directly to ${hrEmail}.`,
         );
       } finally {
         window.clearTimeout(timeout);
