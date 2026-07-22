@@ -4,8 +4,11 @@ import JobCard from '../components/JobCard.astro';
 import { SITE } from '../config';
 import { getCollection } from 'astro:content';
 
-const jobs = await getCollection('jobs');
-const depts = ['All', ...new Set(jobs.map((j) => j.data.dept))];
+const allJobs = await getCollection('jobs');
+const jobs = allJobs
+  .filter((job) => job.data.status !== 'closed')
+  .sort((a, b) => b.data.datePosted.localeCompare(a.data.datePosted));
+const depts = ['All', ...new Set(jobs.map((job) => job.data.dept))];
 
 const faqs = [
   { q: 'How do I apply?', a: 'Open the role page and submit the application form with your CV (PDF preferred). You can also email hr@aqar1.com with the role code in the subject line.' },
@@ -110,7 +113,7 @@ const steps = [
             type={j.data.type}
             mode={j.data.mode}
             summary={j.data.summary}
-            open={j.data.open}
+            status={j.data.status}
           />
         ))}
       </div>

@@ -1,134 +1,320 @@
 ---
 import { SITE } from '../config';
+
 interface Props {
   jobTitle: string;
   jobCode: string;
 }
+
 const { jobTitle, jobCode } = Astro.props;
 ---
-<div id="apply" class="card apply-card">
+<div id="apply" class="card apply-card" data-application-card>
   <div class="eyebrow">Apply — {jobCode}</div>
   <h2 class="form-title">Ready to lead the next stage of growth?</h2>
   <p class="body-sm muted intro">
-    Fill in the form below — we confirm receipt within one business day.
-    Or email your CV to <a href={`mailto:${SITE.hrEmail}`}>{SITE.hrEmail}</a>.
+    Complete the form below. You can also email your CV to
+    <a href={`mailto:${SITE.hrEmail}?subject=${encodeURIComponent(`Application ${jobCode}`)}`}>{SITE.hrEmail}</a>.
   </p>
 
-  <div class="success" hidden>
-    <span class="check">✓</span>
+  <div class="success" data-success role="status" aria-live="polite" tabindex="-1" hidden>
+    <span class="check" aria-hidden="true">✓</span>
     <div>
       <div class="h4">Application received</div>
-      <div class="body-sm muted">Thank you — our HR team will contact you within one business day.</div>
+      <div class="body-sm muted">Thank you. Our HR team will review your application and contact shortlisted candidates.</div>
     </div>
   </div>
 
-  <form novalidate>
+  <form data-application-form novalidate>
     <input type="hidden" name="job" value={jobTitle} />
     <input type="hidden" name="code" value={jobCode} />
+    <input type="hidden" name="startedAt" value="" />
+    <input type="hidden" name="submissionId" value="" />
+
+    <div class="honeypot" aria-hidden="true">
+      <label for="app-website">Website</label>
+      <input id="app-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
     <div class="field">
       <label for="app-name">Full name *</label>
-      <input id="app-name" name="name" type="text" required placeholder="Your full name" autocomplete="name" />
+      <input id="app-name" name="name" type="text" required minlength="2" maxlength="120" placeholder="Your full name" autocomplete="name" />
     </div>
+
     <div class="field">
       <label for="app-email">Email *</label>
-      <input id="app-email" name="email" type="email" required placeholder="you@example.com" autocomplete="email" />
+      <input id="app-email" name="email" type="email" required maxlength="160" placeholder="you@example.com" autocomplete="email" inputmode="email" />
     </div>
+
     <div class="field">
       <label for="app-phone">Phone (WhatsApp) *</label>
-      <input id="app-phone" name="phone" type="tel" required placeholder="+966 5X XXX XXXX" autocomplete="tel" />
+      <input id="app-phone" name="phone" type="tel" required minlength="8" maxlength="24" placeholder="+966 5X XXX XXXX" autocomplete="tel" inputmode="tel" />
     </div>
+
     <div class="field">
       <label for="app-linkedin">LinkedIn profile (optional)</label>
-      <input id="app-linkedin" name="linkedin" type="url" placeholder="linkedin.com/in/…" />
+      <input id="app-linkedin" name="linkedin" type="text" maxlength="240" placeholder="linkedin.com/in/…" autocomplete="url" inputmode="url" />
     </div>
+
     <div class="field span-2">
-      <label for="app-cv">CV / Resume (PDF, max 5 MB) *</label>
-      <label class="dropzone" for="app-cv">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
-        <span class="dz-label">Click to upload your CV</span>
+      <label for="app-cv">CV / Resume (PDF, DOC, or DOCX — max 5 MB) *</label>
+      <label class="dropzone" for="app-cv" data-dropzone>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <path d="M17 8l-5-5-5 5" />
+          <path d="M12 3v12" />
+        </svg>
+        <span class="dz-label" data-file-label>Click to upload your CV</span>
       </label>
-      <input id="app-cv" name="cv" type="file" accept=".pdf,.doc,.docx" required class="visually-hidden" />
+      <input
+        id="app-cv"
+        name="cv"
+        type="file"
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        required
+        class="visually-hidden"
+      />
     </div>
+
     <div class="field span-2">
       <label for="app-msg">Cover note (optional)</label>
-      <textarea id="app-msg" name="message" rows="4" placeholder="A few lines on why you're the right fit…"></textarea>
+      <textarea id="app-msg" name="message" rows="4" maxlength="3000" placeholder="A few lines on why you're the right fit…"></textarea>
     </div>
-    <p class="error span-2" role="alert" hidden></p>
+
+    <label class="consent span-2" for="app-consent">
+      <input id="app-consent" name="consent" type="checkbox" required />
+      <span>I confirm that the information submitted is accurate and may be used by Aqar One for recruitment purposes. *</span>
+    </label>
+
+    <p class="error span-2" data-error role="alert" aria-live="assertive" hidden></p>
+
     <div class="actions span-2">
-      <button type="submit" class="btn btn-primary">Submit application</button>
-      <span class="privacy">Your data is sent securely to our HR team only.</span>
+      <button type="submit" class="btn btn-primary" data-submit>
+        <span data-submit-label>Submit application</span>
+      </button>
+      <span class="privacy">Applications are shared with Aqar One's recruitment team.</span>
     </div>
   </form>
 </div>
 
-<script define:vars={{ endpoint: SITE.applyEndpoint, hrEmail: SITE.hrEmail }}>
-  const card = document.getElementById('apply');
-  const form = card.querySelector('form');
-  const errorEl = card.querySelector('.error');
-  const successEl = card.querySelector('.success');
-  const dzLabel = card.querySelector('.dz-label');
-  const cvInput = form.elements.cv;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const MAX = 5 * 1024 * 1024;
+<script define:vars={{
+  endpoint: SITE.applyEndpoint,
+  hrEmail: SITE.hrEmail,
+  maxCvBytes: SITE.application.maxCvBytes,
+  allowedCvExtensions: SITE.application.allowedCvExtensions,
+}}>
+  const card = document.querySelector('[data-application-card]');
 
-  cvInput.addEventListener('change', () => {
-    const f = cvInput.files[0];
-    if (f && f.size > MAX) {
-      showError('CV file is larger than 5 MB. Please upload a smaller file.');
-      cvInput.value = '';
-      dzLabel.textContent = 'Click to upload your CV';
-      return;
-    }
-    hideError();
-    dzLabel.textContent = f ? f.name : 'Click to upload your CV';
-  });
+  if (card) {
+    const form = card.querySelector('[data-application-form]');
+    const errorEl = card.querySelector('[data-error]');
+    const successEl = card.querySelector('[data-success]');
+    const cvInput = card.querySelector('#app-cv');
+    const fileLabel = card.querySelector('[data-file-label]');
+    const submitBtn = card.querySelector('[data-submit]');
+    const submitLabel = card.querySelector('[data-submit-label]');
+    const startedAtInput = card.querySelector('input[name="startedAt"]');
+    const submissionIdInput = card.querySelector('input[name="submissionId"]');
+    const defaultSubmitLabel = 'Submit application';
+    let isSubmitting = false;
 
-  function showError(msg) { errorEl.textContent = msg; errorEl.hidden = false; }
-  function hideError() { errorEl.hidden = true; }
+    // Force the initial state every time the page loads, including bfcache restores.
+    const resetView = () => {
+      if (!form || !successEl) return;
+      form.hidden = false;
+      successEl.hidden = true;
+    };
 
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result).split(',')[1]);
-      r.onerror = reject;
-      r.readAsDataURL(file);
+    resetView();
+    window.addEventListener('pageshow', resetView);
+
+    const createSubmissionId = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    if (startedAtInput) startedAtInput.value = String(Date.now());
+    if (submissionIdInput) submissionIdInput.value = createSubmissionId();
+
+    const showError = (message) => {
+      if (!errorEl) return;
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+      errorEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+
+    const hideError = () => {
+      if (!errorEl) return;
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    };
+
+    const setSubmitting = (submitting) => {
+      isSubmitting = submitting;
+      if (submitBtn) submitBtn.disabled = submitting;
+      if (submitLabel) submitLabel.textContent = submitting ? 'Sending…' : defaultSubmitLabel;
+      if (form) form.setAttribute('aria-busy', String(submitting));
+    };
+
+    const getExtension = (filename) => {
+      const parts = String(filename).toLowerCase().split('.');
+      return parts.length > 1 ? parts.pop() : '';
+    };
+
+    const validateFile = (file) => {
+      if (!file) return 'Please attach your CV.';
+      if (file.size > maxCvBytes) return 'CV file is larger than 5 MB. Please upload a smaller file.';
+      const extension = getExtension(file.name);
+      if (!allowedCvExtensions.includes(extension)) return 'Please upload a PDF, DOC, or DOCX file.';
+      return '';
+    };
+
+    const normalizeLinkedIn = (value) => {
+      const clean = String(value || '').trim();
+      if (!clean) return '';
+      return /^https?:\/\//i.test(clean) ? clean : `https://${clean}`;
+    };
+
+    const isValidLinkedIn = (value) => {
+      if (!value) return true;
+      try {
+        const url = new URL(value);
+        return url.protocol === 'https:' || url.protocol === 'http:';
+      } catch {
+        return false;
+      }
+    };
+
+    const isValidEndpoint = (value) => {
+      try {
+        const url = new URL(String(value || ''));
+        return url.protocol === 'https:' &&
+          (url.hostname === 'script.google.com' || url.hostname.endsWith('.googleusercontent.com'));
+      } catch {
+        return false;
+      }
+    };
+
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        const commaIndex = result.indexOf(',');
+        if (commaIndex < 0) reject(new Error('Unable to read CV file.'));
+        else resolve(result.slice(commaIndex + 1));
+      };
+      reader.onerror = () => reject(new Error('Unable to read CV file.'));
+      reader.readAsDataURL(file);
+    });
+
+    cvInput?.addEventListener('change', () => {
+      hideError();
+      const file = cvInput.files?.[0];
+      const fileError = validateFile(file);
+
+      if (fileError) {
+        if (file) showError(fileError);
+        cvInput.value = '';
+        if (fileLabel) fileLabel.textContent = 'Click to upload your CV';
+        return;
+      }
+
+      if (fileLabel) fileLabel.textContent = file.name;
+    });
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (isSubmitting) return;
+
+      hideError();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (!isValidEndpoint(endpoint)) {
+        showError(`Online applications are temporarily unavailable. Please email your CV to ${hrEmail}.`);
+        return;
+      }
+
+      const data = new FormData(form);
+      const name = String(data.get('name') || '').trim();
+      const email = String(data.get('email') || '').trim();
+      const phone = String(data.get('phone') || '').trim();
+      const linkedin = normalizeLinkedIn(data.get('linkedin'));
+      const message = String(data.get('message') || '').trim();
+      const cv = cvInput?.files?.[0];
+      const fileError = validateFile(cv);
+
+      if (name.length < 2) return showError('Please enter your full name.');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showError('Please enter a valid email address.');
+      if ((phone.match(/\d/g) || []).length < 8) return showError('Please enter a valid phone number.');
+      if (!isValidLinkedIn(linkedin)) return showError('Please enter a valid LinkedIn profile URL.');
+      if (fileError) return showError(fileError);
+
+      setSubmitting(true);
+
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 45000);
+
+      try {
+        const payload = {
+          submissionId: String(data.get('submissionId') || createSubmissionId()),
+          job: String(data.get('job') || ''),
+          code: String(data.get('code') || ''),
+          name,
+          email,
+          phone,
+          linkedin,
+          message,
+          consent: data.get('consent') === 'on',
+          website: String(data.get('website') || ''),
+          elapsedMs: Math.max(0, Date.now() - Number(data.get('startedAt') || Date.now())),
+          sourceUrl: window.location.href,
+          userAgent: navigator.userAgent,
+          cvName: cv.name,
+          cvType: cv.type || 'application/octet-stream',
+          cvSize: cv.size,
+          cvData: await fileToBase64(cv),
+        };
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify(payload),
+          redirect: 'follow',
+          credentials: 'omit',
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+
+        const responseText = await response.text();
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch {
+          throw new Error('The application service returned an invalid response.');
+        }
+
+        if (!result?.ok) throw new Error(result?.error || 'The application was not saved.');
+
+        form.reset();
+        if (fileLabel) fileLabel.textContent = 'Click to upload your CV';
+        form.hidden = true;
+        successEl.hidden = false;
+        successEl.focus({ preventScroll: true });
+        successEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } catch (error) {
+        const timedOut = error instanceof DOMException && error.name === 'AbortError';
+        showError(
+          timedOut
+            ? `The request took too long. Please try again or email your CV to ${hrEmail}.`
+            : `We could not submit your application. Please try again or email your CV to ${hrEmail}.`,
+        );
+      } finally {
+        window.clearTimeout(timeout);
+        setSubmitting(false);
+      }
     });
   }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideError();
-    const data = new FormData(form);
-    const name = data.get('name').trim();
-    const email = data.get('email').trim();
-    const phone = data.get('phone').trim();
-    const cv = cvInput.files[0];
-    if (!name || !email || !phone) return showError('Please fill in your name, email, and phone number.');
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showError('Please enter a valid email address.');
-    if (!cv) return showError('Please attach your CV (PDF preferred).');
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending…';
-    try {
-      const payload = {
-        job: data.get('job'), code: data.get('code'),
-        name, email, phone,
-        linkedin: data.get('linkedin'), message: data.get('message'),
-        cvName: cv.name, cvType: cv.type || 'application/pdf',
-        cvData: await fileToBase64(cv),
-      };
-      // text/plain body = CORS "simple request" — required for Google Apps Script
-      const res = await fetch(endpoint, { method: 'POST', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error('Bad response');
-      form.hidden = true;
-      successEl.hidden = false;
-      successEl.scrollTop; // no-op read
-    } catch (err) {
-      showError(`Something went wrong. Please try again or email ${hrEmail} directly.`);
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit application';
-    }
-  });
 </script>
 
 <style>
@@ -136,21 +322,31 @@ const { jobTitle, jobCode } = Astro.props;
   .form-title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: var(--space-2) 0; }
   .intro { margin: 0 0 var(--space-6); }
   .intro a { font-weight: 600; }
-  form { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  form { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .span-2 { grid-column: 1 / -1; }
+  .honeypot { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .dropzone {
     display: flex; align-items: center; gap: var(--space-3);
-    border: 1.5px dashed var(--line-strong); border-radius: var(--radius-input);
+    min-height: 58px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-input);
     background: var(--surface-alt); padding: var(--space-4);
-    cursor: pointer; color: var(--bronze-deep); transition: border-color 150ms ease;
+    cursor: pointer; color: var(--bronze-deep); transition: border-color 150ms ease, background-color 150ms ease;
   }
-  .dropzone:hover { border-color: var(--bronze); }
-  .dz-label { font-size: 0.9375rem; font-weight: 500; color: var(--ink-3); }
-  .visually-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
-  .error { margin: 0; font-size: 0.9375rem; color: var(--clay); background: var(--clay-tint); border-radius: var(--radius-input); padding: var(--space-3) var(--space-4); }
+  .dropzone:hover { border-color: var(--bronze); background: var(--bronze-tint); }
+  .dropzone:has(+ input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .dz-label { min-width: 0; overflow-wrap: anywhere; font-size: 0.9375rem; font-weight: 500; color: var(--ink-2); }
+  .visually-hidden { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+  .consent { display: flex; align-items: flex-start; gap: var(--space-3); font-size: 0.875rem; color: var(--ink-2); cursor: pointer; }
+  .consent input { inline-size: 18px; block-size: 18px; flex: 0 0 auto; margin-top: 4px; accent-color: var(--bronze-deep); }
+  .error { margin: 0; font-size: 0.9375rem; color: var(--clay); background: var(--clay-tint); border: 1px solid color-mix(in srgb, var(--clay) 35%, transparent); border-radius: var(--radius-input); padding: var(--space-3) var(--space-4); }
   .actions { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
   .privacy { font-size: 0.8125rem; color: var(--ink-3); }
-  .success { display: flex; gap: var(--space-3); align-items: baseline; border: 1px solid var(--olive); background: var(--olive-tint); border-radius: var(--radius-input); padding: var(--space-5); }
-  .check { color: var(--olive); font-weight: 700; }
-  @media (max-width: 767px) { form { grid-template-columns: 1fr; } }
+  .success { display: flex; gap: var(--space-3); align-items: flex-start; border: 1px solid var(--olive); background: var(--olive-tint); border-radius: var(--radius-input); padding: var(--space-5); }
+  .success:focus { outline: none; }
+  .check { color: var(--olive); font-size: 1.25rem; line-height: 1.3; font-weight: 700; }
+
+  @media (max-width: 767px) {
+    .apply-card { padding: var(--space-5); }
+    form { grid-template-columns: 1fr; }
+    .actions .btn { width: 100%; }
+  }
 </style>

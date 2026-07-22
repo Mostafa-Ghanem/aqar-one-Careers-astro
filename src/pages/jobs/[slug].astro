@@ -4,43 +4,83 @@ import ApplyForm from '../../components/ApplyForm.astro';
 import { SITE } from '../../config';
 import { getCollection, render } from 'astro:content';
 
-export async function getStaticPaths() {
-  const jobs = await getCollection('jobs');
-  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
-}
-
 const { job } = Astro.props;
 const { Content } = await render(job);
 const d = job.data;
+const isClosingSoon = d.status === 'closing-soon';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 
-// SEO: Google Jobs structured data
-const jsonLd = {
+const employmentTypes: Record<string, string> = {
+  'Full-time': 'FULL_TIME',
+  'Part-time': 'PART_TIME',
+  Contract: 'CONTRACTOR',
+  Temporary: 'TEMPORARY',
+  Internship: 'INTERN',
+};
+
+const escapeHtml = (value: string) => value
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
+
+const respList = d.responsibilities.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+const reqList = d.requirements.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+
+const structuredDescription = `<p>${escapeHtml(d.summary)}</p><h2>Key responsibilities</h2><ul>${respList}</ul><h2>Requirements</h2><ul>${reqList}</ul>`;
+
+export async function getStaticPaths() {
+  const jobs = await getCollection('jobs', ({ data }) => data.status !== 'closed');
+  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
+}
+
+const jsonLd: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'JobPosting',
   title: d.title,
-  description: d.summary,
+  description: structuredDescription,
   identifier: { '@type': 'PropertyValue', name: SITE.name, value: d.code },
   datePosted: d.datePosted,
-  employmentType: d.type.toUpperCase().replace('-', '_'),
-  hiringOrganization: { '@type': 'Organization', name: SITE.name, sameAs: SITE.mainSite },
-  jobLocation: {
-    '@type': 'Place',
-    address: { '@type': 'PostalAddress', addressLocality: 'Jeddah', addressCountry: 'SA' },
+  employmentType: employmentTypes[d.type] ?? 'OTHER',
+  directApply: true,
+  url: canonicalUrl,
+  hiringOrganization: {
+    '@type': 'Organization',
+    name: SITE.name,
+    sameAs: SITE.mainSite,
+    logo: new URL('/assets/logo-dark.png', Astro.site).href,
   },
-  applicantLocationRequirements: { '@type': 'Country', name: 'Saudi Arabia' },
 };
+
+if (d.validThrough) jsonLd.validThrough = `${d.validThrough}T23:59:59+03:00`;
+
+if (d.mode === 'Remote') {
+  jsonLd.jobLocationType = 'TELECOMMUTE';
+  jsonLd.applicantLocationRequirements = { '@type': 'Country', name: 'Saudi Arabia' };
+} else {
+  jsonLd.jobLocation = {
+    '@type': 'Place',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: d.location.split(',')[0].trim(),
+      addressCountry: 'SA',
+    },
+  };
+}
 ---
 <BaseLayout
   title={`${d.title} — Careers at Aqar One`}
   description={`Aqar One is hiring: ${d.title} in ${d.location}. ${d.type}, ${d.mode}. Apply now.`}
   jsonLd={jsonLd}
 >
-  <!-- Job hero -->
   <section class="job-hero grid-backdrop">
     <div class="container">
       <div class="hero-meta">
         <span class="eyebrow">{d.dept} · {d.code}</span>
-        <span class={`badge ${d.open ? 'badge-open' : 'badge-closing'}`}>{d.open ? 'Open' : 'Closing soon'}</span>
+        <span class={`badge ${isClosingSoon ? 'badge-closing' : 'badge-open'}`}>
+          {isClosingSoon ? 'Closing soon' : 'Open'}
+        </span>
       </div>
       <h1 class="display job-title">{d.title}</h1>
       <div class="hero-chips">
@@ -52,7 +92,6 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- Body -->
   <section class="job-body">
     <div class="container body-grid">
       <article>
@@ -61,30 +100,30 @@ const jsonLd = {
 
         <h2 class="sub-h2">Key responsibilities</h2>
         <ol class="resp-list">
-          {d.responsibilities.map((r, i) => (
+          {d.responsibilities.map((responsibility, index) => (
             <li>
-              <span class="resp-num">{String(i + 1).padStart(2, '0')}</span>
-              <span>{r}</span>
+              <span class="resp-num">{String(index + 1).padStart(2, '0')}</span>
+              <span>{responsibility}</span>
             </li>
           ))}
         </ol>
 
         <h2 class="sub-h2">Requirements</h2>
         <ul class="req-list">
-          {d.requirements.map((r) => <li>{r}</li>)}
+          {d.requirements.map((requirement) => <li>{requirement}</li>)}
         </ul>
 
         <ApplyForm jobTitle={d.title} jobCode={d.code} />
       </article>
 
-      <aside class="card summary-card">
+      <aside class="card summary-card" aria-label="Job summary">
         <div class="code sum-code">{d.code}</div>
         <div class="sum-row"><span>Department</span><strong>{d.dept}</strong></div>
-        <div class="sum-row"><span>Location</span><strong>{d.location.split(',')[0]}, KSA</strong></div>
+        <div class="sum-row"><span>Location</span><strong>{d.location}</strong></div>
         <div class="sum-row"><span>Type</span><strong>{d.type} · {d.mode}</strong></div>
         {d.experience && <div class="sum-row"><span>Experience</span><strong>{d.experience}</strong></div>}
         <a href="#apply" class="btn btn-primary sum-btn">Apply for this role</a>
-        <a href={`mailto:${SITE.hrEmail}?subject=Application%20${d.code}`} class="btn btn-secondary sum-btn-2">Email your CV</a>
+        <a href={`mailto:${SITE.hrEmail}?subject=${encodeURIComponent(`Application ${d.code}`)}`} class="btn btn-secondary sum-btn-2">Email your CV</a>
       </aside>
     </div>
   </section>
@@ -99,7 +138,7 @@ const jsonLd = {
 
   .job-body { padding-block: var(--space-8) var(--space-9); }
   .body-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--space-8); align-items: start; }
-  article { max-width: 72ch; }
+  article { max-width: 72ch; min-width: 0; }
 
   .sub-h2 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: 0 0 var(--space-5); }
   .about { margin-bottom: var(--space-7); }
@@ -117,7 +156,7 @@ const jsonLd = {
   .sum-code { padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
   .sum-row { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: 14px; border-bottom: 1px solid var(--line); }
   .sum-row span { font-size: 0.8125rem; font-weight: 600; color: var(--ink-3); }
-  .sum-row strong { font-size: 0.9375rem; font-weight: 600; }
+  .sum-row strong { font-size: 0.9375rem; font-weight: 600; text-align: end; }
   .sum-btn { margin-top: var(--space-5); width: 100%; }
   .sum-btn-2 { margin-top: var(--space-3); width: 100%; }
 

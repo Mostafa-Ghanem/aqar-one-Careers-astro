@@ -24,7 +24,7 @@ requirements:
   - "Proven experience in building and scaling sales teams."
   - "Excellent analytical and strategic planning abilities."
   - "Hands-on experience with CRM systems and sales reporting tools."
-open: true
+status: "open"
 datePosted: "2026-07-09"
 ---
 

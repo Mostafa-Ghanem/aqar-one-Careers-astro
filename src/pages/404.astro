@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Page not found — Aqar One Careers"
+  description="The requested Aqar One Careers page could not be found."
+  noIndex={true}
+>
+  <section class="section not-found grid-backdrop">
+    <div class="container inner">
+      <div class="eyebrow">Error 404</div>
+      <h1 class="display">This page is no longer available.</h1>
+      <p class="body-lg muted">The role may have closed, or the address may be incorrect.</p>
+      <a href="/#roles" class="btn btn-primary">View open roles</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found { min-height: 60vh; display: grid; place-items: center; }
+  .inner { max-width: 760px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+  p { margin: 0; }
+</style>

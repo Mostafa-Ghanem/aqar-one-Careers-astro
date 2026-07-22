@@ -4,18 +4,19 @@ import { glob } from 'astro/loaders';
 const jobs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/jobs' }),
   schema: z.object({
-    title: z.string(),
-    dept: z.string(),            // e.g. "Sales"
-    code: z.string(),            // e.g. "AQ1-SAL-001"
+    title: z.string().min(1),
+    dept: z.string().min(1),
+    code: z.string().regex(/^AQ1-[A-Z0-9]{2,6}-\d{3}$/),
     location: z.string().default('Jeddah, Saudi Arabia'),
-    type: z.string().default('Full-time'),
-    mode: z.string().default('On-site'),
+    type: z.enum(['Full-time', 'Part-time', 'Contract', 'Temporary', 'Internship']).default('Full-time'),
+    mode: z.enum(['On-site', 'Hybrid', 'Remote']).default('On-site'),
     experience: z.string().optional(),
-    summary: z.string(),
-    responsibilities: z.array(z.string()),
-    requirements: z.array(z.string()),
-    open: z.boolean().default(true),
-    datePosted: z.string(),      // ISO date, used in JSON-LD
+    summary: z.string().min(40),
+    responsibilities: z.array(z.string().min(1)).min(1),
+    requirements: z.array(z.string().min(1)).min(1),
+    status: z.enum(['open', 'closing-soon', 'closed']).default('open'),
+    datePosted: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    validThrough: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }),
 });
 
