@@ -1,0 +1,78 @@
+---
+import type { JobsBlock as JobsBlockData, Job } from '../../cms/types';
+import JobCard from '../JobCard.astro';
+import Container from '../ui/Container.astro';
+import Chip from '../ui/Chip.astro';
+
+interface Props {
+  data: JobsBlockData;
+  jobs: Job[];
+  hrEmail: string;
+}
+
+const { data, jobs, hrEmail } = Astro.props;
+const depts = ['All', ...new Set(jobs.map((job) => job.data.dept))];
+---
+<section id="roles" class="section">
+  <Container>
+    <div class="eyebrow sec-eyebrow">{data.eyebrow}</div>
+    <div class="roles-head">
+      <h2 class="h2">{data.title}</h2>
+      <span class="code" data-role-count>{jobs.length} open position{jobs.length === 1 ? '' : 's'}</span>
+    </div>
+    <div class="filters" role="group" aria-label="Filter by department">
+      {depts.map((d, i) => (
+        <Chip button pressed={i === 0} filter={d}>{d}</Chip>
+      ))}
+    </div>
+    <div class="roles-grid" data-roles>
+      {jobs.map((j) => (
+        <JobCard
+          slug={j.id}
+          title={j.data.title}
+          dept={j.data.dept}
+          code={j.data.code}
+          location={(j.data.location || '').split(',')[0] || 'Jeddah'}
+          type={j.data.type}
+          mode={j.data.mode}
+          summary={j.data.summary}
+          status={j.data.status}
+        />
+      ))}
+    </div>
+    <div class="no-roles" data-empty hidden>
+      {data.emptyText}
+      <a href={`mailto:${hrEmail}`}>{hrEmail}</a>.
+    </div>
+  </Container>
+</section>
+
+<script>
+  const chips = document.querySelectorAll('[data-filter]');
+  const cards = document.querySelectorAll('[data-roles] [data-dept]');
+  const empty = document.querySelector('[data-empty]');
+  const count = document.querySelector('[data-role-count]');
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      const f = chip.getAttribute('data-filter');
+      let visible = 0;
+      cards.forEach((card) => {
+        const show = f === 'All' || card.getAttribute('data-dept') === f;
+        (card as HTMLElement).style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      if (empty) (empty as HTMLElement).hidden = visible > 0;
+      if (count) count.textContent = `${visible} open position${visible === 1 ? '' : 's'}`;
+    });
+  });
+</script>
+
+<style>
+  .sec-eyebrow { margin-bottom: var(--space-4); }
+  .roles-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-6); }
+  .filters { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-6); }
+  .roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--space-5); }
+  .no-roles { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-card); padding: var(--space-7); text-align: center; color: var(--ink-3); font-size: 0.9375rem; }
+  .no-roles a { font-weight: 600; }
+</style>

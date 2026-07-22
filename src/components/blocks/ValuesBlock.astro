@@ -1,0 +1,58 @@
+---
+import type { ValuesBlock as ValuesBlockData } from '../../cms/types';
+import Container from '../ui/Container.astro';
+
+interface Props {
+  data: ValuesBlockData;
+}
+
+const { data } = Astro.props;
+
+const renderIcon = (iconName: string) => {
+  if (iconName === 'building') {
+    return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M6 21V8l6-4 6 4v13"/><path d="M10 21v-5h4v5"/></svg>`;
+  }
+  if (iconName === 'trending-up') {
+    return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>`;
+  }
+  // Default 'star'
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8z"/></svg>`;
+};
+---
+<section id="why" class="section alt">
+  <Container>
+    <div class="eyebrow sec-eyebrow">{data.eyebrow}</div>
+    <h2 class="h2 sec-title">{data.title}</h2>
+    <div class="values">
+      {data.items.map((item) => (
+        <div class="card">
+          <div class="icon-tile" set:html={renderIcon(item.icon)} />
+          <h3 class="h3">{item.title}</h3>
+          <p class="body-sm muted">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  </Container>
+</section>
+
+<style>
+  .alt { background: var(--surface-alt); }
+  .sec-eyebrow { margin-bottom: var(--space-4); }
+  .sec-title { margin-bottom: var(--space-7); max-width: 720px; }
+  .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .values .card { padding: var(--space-6); }
+  .icon-tile {
+    width: 44px; height: 44px; border-radius: var(--radius-btn);
+    background: var(--bronze-tint); border: 1px solid var(--bronze-ring); color: var(--bronze-deep);
+    display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-5);
+  }
+  .values .h3 { margin-bottom: var(--space-3); }
+  .values p { margin: 0; }
+
+  @media (max-width: 1023px) {
+    .values { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .values { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,19 +1,23 @@
 ---
+import type { SiteSettings } from '../cms/types';
+import { getSiteSettings } from '../cms/repository';
 import { SITE } from '../config';
 
 interface Props {
   jobTitle: string;
   jobCode: string;
+  site?: SiteSettings;
 }
 
-const { jobTitle, jobCode } = Astro.props;
+const { jobTitle, jobCode, site: siteProp } = Astro.props;
+const site = siteProp || (await getSiteSettings());
 ---
 <div id="apply" class="card apply-card" data-application-card>
   <div class="eyebrow">Apply — {jobCode}</div>
   <h2 class="form-title">Ready to lead the next stage of growth?</h2>
   <p class="body-sm muted intro">
     Complete the form below. You can also email your CV to
-    <a href={`mailto:${SITE.hrEmail}?subject=${encodeURIComponent(`Application ${jobCode}`)}`}>{SITE.hrEmail}</a>.
+    <a href={`mailto:${site.hrEmail}?subject=${encodeURIComponent(`Application ${jobCode}`)}`}>{site.hrEmail}</a>.
   </p>
 
   <div class="success" data-success role="status" aria-live="polite" tabindex="-1" hidden>
@@ -82,7 +86,7 @@ const { jobTitle, jobCode } = Astro.props;
 
     <label class="consent span-2" for="app-consent">
       <input id="app-consent" name="consent" type="checkbox" required />
-      <span>I confirm that the information submitted is accurate and may be used by Aqar One for recruitment purposes. *</span>
+      <span>I confirm that the information submitted is accurate and may be used by {site.name} for recruitment purposes. *</span>
     </label>
 
     <p class="error span-2" data-error role="alert" aria-live="assertive" hidden></p>
@@ -91,14 +95,14 @@ const { jobTitle, jobCode } = Astro.props;
       <button type="submit" class="btn btn-primary" data-submit>
         <span data-submit-label>Submit application</span>
       </button>
-      <span class="privacy">Applications are shared with Aqar One's recruitment team.</span>
+      <span class="privacy">Applications are shared with {site.name}'s recruitment team.</span>
     </div>
   </form>
 </div>
 
 <script define:vars={{
-  endpoint: SITE.applyEndpoint,
-  hrEmail: SITE.hrEmail,
+  endpoint: site.applyEndpoint || SITE.applyEndpoint,
+  hrEmail: site.hrEmail,
   maxCvBytes: SITE.application.maxCvBytes,
   allowedCvExtensions: SITE.application.allowedCvExtensions,
 }}>
@@ -117,7 +121,6 @@ const { jobTitle, jobCode } = Astro.props;
     const defaultSubmitLabel = 'Submit application';
     let isSubmitting = false;
 
-    // Force the initial state every time the page loads, including bfcache restores.
     const resetView = () => {
       if (!form || !successEl) return;
       form.hidden = false;

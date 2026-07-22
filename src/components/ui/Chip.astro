@@ -1,0 +1,42 @@
+---
+interface Props {
+  solid?: boolean;
+  button?: boolean;
+  pressed?: boolean;
+  filter?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  solid = false,
+  button = false,
+  pressed = false,
+  filter,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'chip',
+  solid ? 'solid' : '',
+  button ? 'chip-btn' : '',
+  className,
+].filter(Boolean).join(' ');
+---
+{
+  button ? (
+    <button
+      class={classes}
+      aria-pressed={pressed ? 'true' : 'false'}
+      data-filter={filter}
+      {...rest}
+    >
+      <slot />
+    </button>
+  ) : (
+    <span class={classes} {...rest}>
+      <slot />
+    </span>
+  )
+}

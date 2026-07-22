@@ -1,11 +1,23 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ApplyForm from '../../components/ApplyForm.astro';
-import { SITE } from '../../config';
-import { getCollection, render } from 'astro:content';
+import { getAllJobs, getJobBySlug, getSiteSettings } from '../../cms/repository';
 
-const { job } = Astro.props;
-const { Content } = await render(job);
+export async function getStaticPaths() {
+  const jobs = await getAllJobs();
+  const openJobs = jobs.filter((job) => job.data.status !== 'closed');
+  return openJobs.map((job) => ({ params: { slug: job.id }, props: { slug: job.id } }));
+}
+
+const { slug } = Astro.params;
+const jobResult = await getJobBySlug(slug as string);
+
+if (!jobResult) {
+  return Astro.redirect('/404');
+}
+
+const { job, Content } = jobResult;
+const site = await getSiteSettings();
 const d = job.data;
 const isClosingSoon = d.status === 'closing-soon';
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
@@ -27,28 +39,22 @@ const escapeHtml = (value: string) => value
 
 const respList = d.responsibilities.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
 const reqList = d.requirements.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
-
 const structuredDescription = `<p>${escapeHtml(d.summary)}</p><h2>Key responsibilities</h2><ul>${respList}</ul><h2>Requirements</h2><ul>${reqList}</ul>`;
-
-export async function getStaticPaths() {
-  const jobs = await getCollection('jobs', ({ data }) => data.status !== 'closed');
-  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
-}
 
 const jsonLd: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'JobPosting',
   title: d.title,
   description: structuredDescription,
-  identifier: { '@type': 'PropertyValue', name: SITE.name, value: d.code },
+  identifier: { '@type': 'PropertyValue', name: site.name, value: d.code },
   datePosted: d.datePosted,
   employmentType: employmentTypes[d.type] ?? 'OTHER',
   directApply: true,
   url: canonicalUrl,
   hiringOrganization: {
     '@type': 'Organization',
-    name: SITE.name,
-    sameAs: SITE.mainSite,
+    name: site.name,
+    sameAs: site.mainSite,
     logo: new URL('/assets/logo-dark.png', Astro.site).href,
   },
 };
@@ -63,16 +69,17 @@ if (d.mode === 'Remote') {
     '@type': 'Place',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: d.location.split(',')[0].trim(),
+      addressLocality: (d.location || '').split(',')[0].trim() || 'Jeddah',
       addressCountry: 'SA',
     },
   };
 }
 ---
 <BaseLayout
-  title={`${d.title} — Careers at Aqar One`}
-  description={`Aqar One is hiring: ${d.title} in ${d.location}. ${d.type}, ${d.mode}. Apply now.`}
+  title={`${d.title} — Careers at ${site.name}`}
+  description={`${site.name} is hiring: ${d.title} in ${d.location}. ${d.type}, ${d.mode}. Apply now.`}
   jsonLd={jsonLd}
+  site={site}
 >
   <section class="job-hero grid-backdrop">
     <div class="container">
@@ -113,7 +120,7 @@ if (d.mode === 'Remote') {
           {d.requirements.map((requirement) => <li>{requirement}</li>)}
         </ul>
 
-        <ApplyForm jobTitle={d.title} jobCode={d.code} />
+        <ApplyForm jobTitle={d.title} jobCode={d.code} site={site} />
       </article>
 
       <aside class="card summary-card" aria-label="Job summary">
@@ -123,7 +130,7 @@ if (d.mode === 'Remote') {
         <div class="sum-row"><span>Type</span><strong>{d.type} · {d.mode}</strong></div>
         {d.experience && <div class="sum-row"><span>Experience</span><strong>{d.experience}</strong></div>}
         <a href="#apply" class="btn btn-primary sum-btn">Apply for this role</a>
-        <a href={`mailto:${SITE.hrEmail}?subject=${encodeURIComponent(`Application ${d.code}`)}`} class="btn btn-secondary sum-btn-2">Email your CV</a>
+        <a href={`mailto:${site.hrEmail}?subject=${encodeURIComponent(`Application ${d.code}`)}`} class="btn btn-secondary sum-btn-2">Email your CV</a>
       </aside>
     </div>
   </section>

@@ -1,0 +1,12 @@
+---
+interface Props {
+  narrow?: boolean;
+  class?: string;
+}
+
+const { narrow = false, class: className = '' } = Astro.props;
+const classes = ['container', narrow ? 'narrow' : '', className].filter(Boolean).join(' ');
+---
+<div class={classes}>
+  <slot />
+</div>

@@ -1,0 +1,15 @@
+---
+interface Props {
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: 'display' | 'h2' | 'h3' | 'h4' | 'sub-h2';
+  class?: string;
+}
+
+const { level = 2, size, class: className = '' } = Astro.props;
+const Tag = `h${level}` as any;
+const sizeClass = size || (level === 1 ? 'display' : `h${level}`);
+const classes = [sizeClass, className].filter(Boolean).join(' ');
+---
+<Tag class={classes}>
+  <slot />
+</Tag>

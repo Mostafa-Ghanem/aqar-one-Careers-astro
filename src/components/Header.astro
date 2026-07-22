@@ -1,20 +1,28 @@
 ---
-import { SITE } from '../config';
+import type { SiteSettings } from '../cms/types';
+import { getSiteSettings } from '../cms/repository';
+
+interface Props {
+  site?: SiteSettings;
+}
+
+const { site: siteProp } = Astro.props;
+const site = siteProp || (await getSiteSettings());
 ---
 <div class="utility-bar">
   <div class="container utility-inner">
-    <a href={`tel:${SITE.phone}`}>{SITE.phoneDisplay}</a>
+    <a href={`tel:${site.phone}`}>{site.phoneDisplay}</a>
     <div class="utility-links">
-      <a class="utility-email" href={`mailto:${SITE.hrEmail}`}>{SITE.hrEmail}</a>
-      <a href={SITE.mainSite} target="_blank" rel="noopener noreferrer">aqar1.com ↗</a>
+      <a class="utility-email" href={`mailto:${site.hrEmail}`}>{site.hrEmail}</a>
+      <a href={site.mainSite} target="_blank" rel="noopener noreferrer">aqar1.com ↗</a>
     </div>
   </div>
 </div>
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="/" class="brand" aria-label="Aqar One Careers home">
-      <img src="/assets/logo-dark.png" alt="Aqar One" width="145" height="50" />
+    <a href="/" class="brand" aria-label={`${site.careersName} home`}>
+      <img src="/assets/logo-dark.png" alt={site.name} width="145" height="50" />
       <span class="eyebrow brand-tag">Careers</span>
     </a>
 

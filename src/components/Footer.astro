@@ -1,12 +1,20 @@
 ---
-import { SITE } from '../config';
+import type { SiteSettings } from '../cms/types';
+import { getSiteSettings } from '../cms/repository';
+
+interface Props {
+  site?: SiteSettings;
+}
+
+const { site: siteProp } = Astro.props;
+const site = siteProp || (await getSiteSettings());
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container">
     <div class="cols">
       <div>
-        <img src="/assets/logo-light.webp" alt="Aqar One" width="117" height="40" />
+        <img src="/assets/logo-light.webp" alt={site.name} width="117" height="40" />
         <p class="body-sm about">
           A Saudi real estate group operating in Jeddah since 2011 — rated Class "A" by the
           Real Estate General Authority and accredited as a judicial sale agent by the Ministry of Justice.
@@ -14,19 +22,19 @@ const year = new Date().getFullYear();
       </div>
       <div>
         <div class="eyebrow col-title">Offices</div>
-        {SITE.offices.map((o) => <p class="body-sm about">{o}</p>)}
+        {site.offices.map((o) => <p class="body-sm about">{o}</p>)}
       </div>
       <div>
         <div class="eyebrow col-title">Contact</div>
         <div class="contact">
-          <a href={`tel:${SITE.phone}`}>{SITE.phoneDisplay}</a>
-          <a href={`mailto:${SITE.hrEmail}`}>{SITE.hrEmail}</a>
-          <a href={SITE.mainSite} target="_blank" rel="noopener noreferrer">aqar1.com ↗</a>
+          <a href={`tel:${site.phone}`}>{site.phoneDisplay}</a>
+          <a href={`mailto:${site.hrEmail}`}>{site.hrEmail}</a>
+          <a href={site.mainSite} target="_blank" rel="noopener noreferrer">aqar1.com ↗</a>
         </div>
       </div>
     </div>
     <div class="bottom">
-      <span>© {year} Aqar One. All rights reserved.</span>
+      <span>© {year} {site.name}. All rights reserved.</span>
       <span class="code">jobs.aqar1.com</span>
     </div>
   </div>

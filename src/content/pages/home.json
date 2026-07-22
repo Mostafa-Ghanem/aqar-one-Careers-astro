@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "eyebrow": "Careers · Jeddah, Saudi Arabia",
+    "title": "Shape the future of real estate with us.",
+    "description": "Since 2011, Aqar One has grown into one of Jeddah's most trusted real estate groups — licensed across six services by the Real Estate General Authority and rated Class \"A\" across Saudi Arabia.",
+    "primaryCta": {
+      "label": "Explore open roles",
+      "href": "#roles"
+    },
+    "secondaryCta": {
+      "label": "Why join Aqar One",
+      "href": "#why"
+    },
+    "seal": {
+      "class": "A",
+      "label": "Class A · Judicial Sale Agent"
+    },
+    "stats": [
+      { "value": "2011", "label": "Operating since" },
+      { "value": "Class \"A\"", "label": "REGA rating, Kingdom-wide" },
+      { "value": "6", "label": "Licensed real estate services" },
+      { "value": "2", "label": "Offices in Jeddah" }
+    ]
+  },
+  "values": {
+    "eyebrow": "01 — Why Aqar One",
+    "title": "A licensed, accredited platform for serious careers.",
+    "items": [
+      {
+        "icon": "star",
+        "title": "Accredited credibility",
+        "description": "Classified by the Real Estate General Authority across Ejar, brokerage, marketing, Mullak, facility management, and Sakani financing guidance — and accredited as a judicial sale agent by the Ministry of Justice."
+      },
+      {
+        "icon": "building",
+        "title": "Real ownership",
+        "description": "We are building departments, not just filling seats. Leaders here design structures, set policies, and own outcomes end to end — with direct access to decision-makers."
+      },
+      {
+        "icon": "trending-up",
+        "title": "Sustainable growth",
+        "description": "Fifteen years of steady growth in Jeddah's market. Your work compounds: measurable KPIs, weekly reviews, and continuous improvement are how we operate."
+      }
+    ]
+  },
+  "jobs": {
+    "eyebrow": "02 — Open Roles",
+    "title": "Current opportunities",
+    "emptyText": "No open roles in this department right now — check back soon or send your CV to"
+  },
+  "process": {
+    "eyebrow": "03 — Hiring Process",
+    "title": "Four clear steps. No surprises.",
+    "steps": [
+      {
+        "title": "Apply online",
+        "description": "Submit your CV through the role page. We confirm receipt within one business day."
+      },
+      {
+        "title": "Screening call",
+        "description": "A 20–30 minute call with HR to align on experience, expectations, and fit."
+      },
+      {
+        "title": "Interviews",
+        "description": "On-site interviews with leadership, including a practical case relevant to the role."
+      },
+      {
+        "title": "Offer & onboarding",
+        "description": "A written offer, then a structured onboarding plan for your first 90 days."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "04 — FAQ",
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "question": "How do I apply?",
+        "answer": "Open the role page and submit the application form with your CV (PDF preferred). You can also email hr@aqar1.com with the role code in the subject line."
+      },
+      {
+        "question": "How long does the hiring process take?",
+        "answer": "Typically two to three weeks from application to offer: screening call within a few days, then on-site interviews, then a written offer."
+      },
+      {
+        "question": "Are roles on-site or remote?",
+        "answer": "Our roles are on-site at our Jeddah offices (Al-Safa or Obhur Al-Shamaliyah), unless the role page states otherwise."
+      },
+      {
+        "question": "Can I apply if no role matches my profile?",
+        "answer": "Yes — send your CV to hr@aqar1.com with a short note on where you would add value. We keep strong profiles on file and reach out when a matching role opens."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Don't see your role?",
+    "description": "We're always looking for exceptional people. Send your CV and tell us where you'd fit."
+  }
+}

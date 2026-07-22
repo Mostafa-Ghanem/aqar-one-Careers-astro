@@ -1,0 +1,28 @@
+---
+import type { CTABlock as CTABlockData } from '../../cms/types';
+import Button from '../ui/Button.astro';
+import Container from '../ui/Container.astro';
+
+interface Props {
+  data: CTABlockData;
+  hrEmail: string;
+}
+
+const { data, hrEmail } = Astro.props;
+---
+<section class="cta-strip">
+  <Container class="cta-inner">
+    <div>
+      <h2 class="h2 on-dark">{data.title}</h2>
+      <p class="cta-sub">{data.description}</p>
+    </div>
+    <Button href={`mailto:${hrEmail}`} variant="primary">Email {hrEmail}</Button>
+  </Container>
+</section>
+
+<style>
+  .cta-strip { background: var(--espresso); padding-block: var(--space-8); }
+  .cta-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
+  .on-dark { color: var(--ink-on-dark); margin-bottom: var(--space-2); }
+  .cta-sub { color: var(--ink-on-dark-2); margin: 0; }
+</style>

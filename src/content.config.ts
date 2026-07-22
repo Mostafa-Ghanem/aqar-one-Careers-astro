@@ -20,4 +20,71 @@ const jobs = defineCollection({
   }),
 });
 
-export const collections = { jobs };
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/pages' }),
+  schema: z.object({
+    hero: z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      description: z.string(),
+      primaryCta: z.object({ label: z.string(), href: z.string() }),
+      secondaryCta: z.object({ label: z.string(), href: z.string() }),
+      seal: z.object({ class: z.string(), label: z.string() }),
+      stats: z.array(z.object({ value: z.string(), label: z.string() })),
+    }),
+    values: z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      items: z.array(z.object({
+        icon: z.string(),
+        title: z.string(),
+        description: z.string(),
+      })),
+    }),
+    jobs: z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      emptyText: z.string(),
+    }),
+    process: z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      steps: z.array(z.object({
+        title: z.string(),
+        description: z.string(),
+      })),
+    }),
+    faq: z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      items: z.array(z.object({
+        question: z.string(),
+        answer: z.string(),
+      })),
+    }),
+    cta: z.object({
+      title: z.string(),
+      description: z.string(),
+    }),
+  }),
+});
+
+const settings = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/settings' }),
+  schema: z.object({
+    name: z.string(),
+    careersName: z.string(),
+    url: z.string().url(),
+    mainSite: z.string().url(),
+    hrEmail: z.string().email(),
+    phone: z.string(),
+    phoneDisplay: z.string(),
+    offices: z.array(z.string()),
+    defaultSeo: z.object({
+      title: z.string(),
+      description: z.string(),
+    }),
+  }),
+});
+
+export const collections = { jobs, pages, settings };

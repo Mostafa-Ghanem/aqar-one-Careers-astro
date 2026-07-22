@@ -1,7 +1,8 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE } from '../config';
+import type { SiteSettings } from '../cms/types';
+import { getSiteSettings } from '../cms/repository';
 import '../styles/global.css';
 
 interface Props {
@@ -9,9 +10,11 @@ interface Props {
   description: string;
   jsonLd?: Record<string, unknown>;
   noIndex?: boolean;
+  site?: SiteSettings;
 }
 
-const { title, description, jsonLd, noIndex = false } = Astro.props;
+const { title, description, jsonLd, noIndex = false, site: siteProp } = Astro.props;
+const site = siteProp || (await getSiteSettings());
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 <!doctype html>
@@ -30,7 +33,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:site_name" content={SITE.careersName} />
+    <meta property="og:site_name" content={site.careersName} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -49,10 +52,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <Header />
+    <Header site={site} />
     <main id="main-content">
       <slot />
     </main>
-    <Footer />
+    <Footer site={site} />
   </body>
 </html>
