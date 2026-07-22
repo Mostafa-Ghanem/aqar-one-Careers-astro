@@ -7,12 +7,12 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "tinacms dev -c \"astro dev\"",
-    "dev:astro": "astro dev",
-    "build": "tinacms build && astro build",
-    "build:astro": "astro build",
-    "preview": "astro preview",
-    "check": "astro check"
+    "dev": "npx tinacms dev -c \"npx astro dev\"",
+    "dev:astro": "npx astro dev",
+    "build": "npx tinacms build && npx astro build",
+    "build:astro": "npx astro build",
+    "preview": "npx astro preview",
+    "check": "npx astro check"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
