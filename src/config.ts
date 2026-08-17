@@ -1,4 +1,5 @@
-const rawEndpoint = (import.meta.env.PUBLIC_APPLY_ENDPOINT ?? '').trim();
+const DEFAULT_APPLY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw8q8BPS2C9khK-CgeSJGChHzMSirA4wzbs8fMegg_wz5yxNSED3uVF8TM5vmC9Pw8lBg/exec';
+const rawEndpoint = (import.meta.env.PUBLIC_APPLY_ENDPOINT ?? DEFAULT_APPLY_ENDPOINT).trim();
 
 export const isValidApplyEndpoint = (url: string): boolean => {
   if (!url) return false;
