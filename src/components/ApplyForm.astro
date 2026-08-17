@@ -136,6 +136,10 @@ const site = siteProp || (await getSiteSettings());
       if (trackingWindow.__CAREERS_DIRECT_TRACKING__) {
         if (typeof trackingWindow.gtag === 'function') trackingWindow.gtag('event', eventName, payload);
         if (trackingWindow.posthog?.capture) trackingWindow.posthog.capture(eventName, payload);
+        else {
+          trackingWindow.__CAREERS_POSTHOG_QUEUE__ = trackingWindow.__CAREERS_POSTHOG_QUEUE__ || [];
+          trackingWindow.__CAREERS_POSTHOG_QUEUE__.push([eventName, payload]);
+        }
       }
     };
 

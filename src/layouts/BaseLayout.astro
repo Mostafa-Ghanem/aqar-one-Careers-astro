@@ -71,6 +71,7 @@ const useDirectTracking = !gtmId;
           (function(){
             if (window.__PH_INITED__) return;
             window.__PH_INITED__ = true;
+            window.__CAREERS_POSTHOG_QUEUE__ = window.__CAREERS_POSTHOG_QUEUE__ || [];
             var s = document.createElement('script');
             s.async = true;
             s.src = 'https://e.aqar1.com/static/array.js';
@@ -82,6 +83,9 @@ const useDirectTracking = !gtmId;
                 capture_pageview: true,
                 capture_pageleave: true
               });
+              var queued = window.__CAREERS_POSTHOG_QUEUE__ || [];
+              queued.forEach(function(item){ window.posthog.capture(item[0], item[1]); });
+              window.__CAREERS_POSTHOG_QUEUE__ = [];
             };
             document.head.appendChild(s);
           })();
