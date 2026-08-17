@@ -120,6 +120,30 @@ const site = siteProp || (await getSiteSettings());
     const submissionIdInput = card.querySelector('input[name="submissionId"]');
     const defaultSubmitLabel = 'Submit application';
     let isSubmitting = false;
+    let applicationStartTracked = false;
+
+    const trackApplicationEvent = (eventName, params = {}) => {
+      const payload = {
+        job_title: String(form?.querySelector('input[name="job"]')?.getAttribute('value') || ''),
+        job_code: String(form?.querySelector('input[name="code"]')?.getAttribute('value') || ''),
+        ...params,
+      };
+
+      const trackingWindow = window;
+      trackingWindow.dataLayer = trackingWindow.dataLayer || [];
+      trackingWindow.dataLayer.push({ event: eventName, ...payload });
+
+      if (trackingWindow.__CAREERS_DIRECT_TRACKING__) {
+        if (typeof trackingWindow.gtag === 'function') trackingWindow.gtag('event', eventName, payload);
+        if (trackingWindow.posthog?.capture) trackingWindow.posthog.capture(eventName, payload);
+      }
+    };
+
+    form?.addEventListener('focusin', () => {
+      if (applicationStartTracked) return;
+      applicationStartTracked = true;
+      trackApplicationEvent('job_application_started');
+    }, { once: true });
 
     const resetView = () => {
       if (!form || !successEl) return;
@@ -300,6 +324,11 @@ const site = siteProp || (await getSiteSettings());
         }
 
         if (!result?.ok) throw new Error(result?.error || 'The application could not be saved.');
+
+        trackApplicationEvent('job_application_submitted', {
+          application_id: String(result?.applicationId || payload.submissionId || ''),
+          notification_sent: Boolean(result?.notificationSent),
+        });
 
         form.reset();
         if (fileLabel) fileLabel.textContent = 'Click to upload your CV';

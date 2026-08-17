@@ -13,7 +13,7 @@ export const isValidApplyEndpoint = (url: string): boolean => {
 export const SITE = {
   name: 'Aqar One',
   careersName: 'Aqar One Careers',
-  url: 'https://jobs.aqar1.com',
+  url: 'https://careers.aqar1.com',
   mainSite: 'https://aqar1.com',
   hrEmail: 'hr@aqar1.com',
   phone: '+966550595911',
