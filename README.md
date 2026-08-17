@@ -1,6 +1,6 @@
 # بوابة التوظيف — Aqar One Careers (TinaCMS & Clean Architecture)
 
-مشروع Astro حديث ومستقر، يعتمد على **البنية النظيفة (Clean Architecture)** ومُهيأ بالكامل لإدارة المحتوى بواسطة **TinaCMS** والنشر التلقائي على Cloudflare Pages (`jobs.aqar1.com`).
+مشروع Astro حديث ومستقر، يعتمد على **البنية النظيفة (Clean Architecture)** ومُهيأ بالكامل لإدارة المحتوى بواسطة **TinaCMS** والنشر التلقائي على Cloudflare Pages (`careers.aqar1.com`).
 
 ---
 
