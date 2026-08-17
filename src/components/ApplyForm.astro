@@ -116,6 +116,33 @@ const { jobTitle, jobCode } = Astro.props;
     const submissionIdInput = card.querySelector('input[name="submissionId"]');
     const defaultSubmitLabel = 'Submit application';
     let isSubmitting = false;
+    let applicationStartTracked = false;
+
+    const trackApplicationEvent = (eventName, params = {}) => {
+      const payload = {
+        job_title: String(form?.querySelector('input[name="job"]')?.getAttribute('value') || ''),
+        job_code: String(form?.querySelector('input[name="code"]')?.getAttribute('value') || ''),
+        ...params,
+      };
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: eventName, ...payload });
+
+      if (window.__CAREERS_DIRECT_TRACKING__) {
+        if (typeof window.gtag === 'function') window.gtag('event', eventName, payload);
+        if (window.posthog?.capture) window.posthog.capture(eventName, payload);
+        else {
+          window.__CAREERS_POSTHOG_QUEUE__ = window.__CAREERS_POSTHOG_QUEUE__ || [];
+          window.__CAREERS_POSTHOG_QUEUE__.push([eventName, payload]);
+        }
+      }
+    };
+
+    form?.addEventListener('focusin', () => {
+      if (applicationStartTracked) return;
+      applicationStartTracked = true;
+      trackApplicationEvent('job_application_started');
+    }, { once: true });
 
     // Force the initial state every time the page loads, including bfcache restores.
     const resetView = () => {
@@ -297,6 +324,11 @@ const { jobTitle, jobCode } = Astro.props;
         }
 
         if (!result?.ok) throw new Error(result?.error || 'The application could not be saved.');
+
+        trackApplicationEvent('job_application_submitted', {
+          application_id: String(result?.applicationId || payload.submissionId || ''),
+          notification_sent: Boolean(result?.notificationSent),
+        });
 
         form.reset();
         if (fileLabel) fileLabel.textContent = 'Click to upload your CV';

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jobs.aqar1.com/sitemap-index.xml
+Sitemap: https://careers.aqar1.com/sitemap-index.xml

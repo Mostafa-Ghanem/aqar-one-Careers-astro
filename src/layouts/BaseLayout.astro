@@ -13,6 +13,8 @@ interface Props {
 
 const { title, description, jsonLd, noIndex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const gtmId = (import.meta.env.PUBLIC_GTM_ID ?? '').trim();
+const useDirectTracking = !gtmId;
 ---
 <!doctype html>
 <html lang="en" dir="ltr">
@@ -46,8 +48,52 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     />
 
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    {gtmId && (
+      <script is:inline set:html={`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`} />
+    )}
+
+    {useDirectTracking && (
+      <>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VDP6HRVVT"></script>
+        <script is:inline>
+          window.__CAREERS_DIRECT_TRACKING__ = true;
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ window.dataLayer.push(arguments); }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-2VDP6HRVVT', { send_page_view: true });
+        </script>
+        <script is:inline>
+          (function(){
+            if (window.__PH_INITED__) return;
+            window.__PH_INITED__ = true;
+            window.__CAREERS_POSTHOG_QUEUE__ = window.__CAREERS_POSTHOG_QUEUE__ || [];
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://e.aqar1.com/static/array.js';
+            script.onload = function(){
+              if (!window.posthog) return;
+              window.posthog.init('phc_P1yy9vLOFC4Al6nwyLNdnBgVZ9084pl3GYj8x422Hw', {
+                api_host: 'https://e.aqar1.com',
+                ui_host: 'https://us.posthog.com',
+                capture_pageview: true,
+                capture_pageleave: true
+              });
+              var queue = window.__CAREERS_POSTHOG_QUEUE__ || [];
+              queue.forEach(function(item){ window.posthog.capture(item[0], item[1]); });
+              window.__CAREERS_POSTHOG_QUEUE__ = [];
+            };
+            document.head.appendChild(script);
+          })();
+        </script>
+      </>
+    )}
   </head>
   <body>
+    {gtmId && (
+      <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    )}
     <a class="skip-link" href="#main-content">Skip to content</a>
     <Header />
     <main id="main-content">
