@@ -9,15 +9,19 @@ interface Props {
   description: string;
   jsonLd?: Record<string, unknown>;
   noIndex?: boolean;
+  lang?: string;
+  dir?: 'ltr' | 'rtl';
+  ogLocale?: string;
+  alternates?: { hreflang: string; href: string }[];
 }
 
-const { title, description, jsonLd, noIndex = false } = Astro.props;
+const { title, description, jsonLd, noIndex = false, lang = 'en', dir = 'ltr', ogLocale = 'en_US', alternates = [] } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const gtmId = (import.meta.env.PUBLIC_GTM_ID ?? '').trim();
 const useDirectTracking = !gtmId;
 ---
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang={lang} dir={dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,9 +33,10 @@ const useDirectTracking = !gtmId;
     <meta name="theme-color" content="#BE9170" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
 
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={ogLocale} />
     <meta property="og:site_name" content={SITE.careersName} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
