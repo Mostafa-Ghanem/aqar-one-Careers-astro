@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../config';
+import { getCollection } from 'astro:content';
+
+const allJobs = await getCollection('jobs-ar');
+const jobs = allJobs
+  .filter((job) => job.data.status !== 'closed')
+  .sort((a, b) => b.data.datePosted.localeCompare(a.data.datePosted));
+
+const typeLabels: Record<string, string> = {
+  'Full-time': 'دوام كامل',
+  'Part-time': 'دوام جزئي',
+  Contract: 'عقد',
+  Temporary: 'مؤقت',
+  Internship: 'تدريب',
+};
+const modeLabels: Record<string, string> = {
+  'On-site': 'من مقر الشركة',
+  Hybrid: 'دوام هجين',
+  Remote: 'عن بُعد',
+};
+const enUrl = new URL('/', Astro.site).href;
+---
+<BaseLayout
+  title="وظائف عقار ون — وظائف عقارية في جدة"
+  description="انضم إلى عقار ون — مجموعة عقارية سعودية في جدة منذ 2011. تصفح الوظائف المتاحة في المبيعات والتسويق والعمليات."
+  lang="ar"
+  dir="rtl"
+  ogLocale="ar_SA"
+  alternates={[
+    { hreflang: 'ar', href: new URL('/ar/', Astro.site).href },
+    { hreflang: 'en', href: enUrl },
+    { hreflang: 'x-default', href: enUrl },
+  ]}
+>
+  <section class="section hero grid-backdrop">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow">الوظائف · جدة، المملكة العربية السعودية</div>
+        <h1 class="display">شارك في صناعة مستقبل العقار معنا.</h1>
+        <p class="body-lg muted">
+          عقار ون — مجموعة عقارية سعودية تعمل في جدة. تصفح الوظائف المتاحة لدينا وقدّم مباشرة عبر الموقع.
+        </p>
+        <div class="hero-ctas">
+          <a href="#roles" class="btn btn-primary">تصفح الوظائف المتاحة</a>
+          <a href="/" hreflang="en" lang="en" class="btn btn-secondary">English version</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles" class="section">
+    <div class="container">
+      <div class="eyebrow sec-eyebrow">الوظائف المتاحة</div>
+      <div class="roles-head">
+        <h2 class="h2">الفرص الحالية</h2>
+        <span class="code">{jobs.length} وظائف متاحة</span>
+      </div>
+      <div class="roles-grid">
+        {jobs.map((j) => (
+          <a href={`/ar/jobs/${j.id}/`} class="card card-hover job-card">
+            <div class="head">
+              <span class="eyebrow">{j.data.dept}</span>
+              <span class={`badge ${j.data.status === 'closing-soon' ? 'badge-closing' : 'badge-open'}`}>
+                {j.data.status === 'closing-soon' ? 'يُغلق قريبًا' : 'متاحة'}
+              </span>
+            </div>
+            <h3 class="h3">{j.data.title}</h3>
+            {j.data.titleEn && <div class="title-en" dir="ltr" lang="en">{j.data.titleEn}</div>}
+            <p class="body-sm muted summary">{j.data.summary}</p>
+            <div class="meta">
+              <span class="chip">{j.data.location}</span>
+              <span class="chip">{typeLabels[j.data.type] ?? j.data.type}</span>
+              <span class="chip">{modeLabels[j.data.mode] ?? j.data.mode}</span>
+            </div>
+            <div class="foot">
+              <span class="code">{j.data.code}</span>
+              <span class="details">عرض التفاصيل ←</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="contact-note">
+        <p class="body-sm muted">
+          للتقديم المباشر أو الاستفسار: <a href={`mailto:${SITE.hrEmail}`} dir="ltr">{SITE.hrEmail}</a> — <span dir="ltr">{SITE.phoneDisplay}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-8); align-items: center; }
+  .hero-ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-5); }
+  .sec-eyebrow { margin-bottom: var(--space-3); }
+  .roles-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap; }
+  .roles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+  .job-card { display: flex; flex-direction: column; gap: var(--space-4); color: var(--ink); min-height: 100%; }
+  .title-en { font-size: 0.875rem; font-weight: 600; color: var(--ink-3); margin-top: calc(-1 * var(--space-3)); }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .summary { margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .meta { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border-top: 1px solid var(--line); padding-top: var(--space-4); margin-top: auto; }
+  .details { font-size: 0.8125rem; font-weight: 600; color: var(--bronze-deep); }
+  .contact-note { margin-top: var(--space-6); }
+  @media (max-width: 1023px) { .roles-grid { grid-template-columns: 1fr 1fr; } .hero-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 767px) { .roles-grid { grid-template-columns: 1fr; } }
+</style>
