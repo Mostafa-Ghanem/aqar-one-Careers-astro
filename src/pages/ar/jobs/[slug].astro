@@ -1,0 +1,195 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ApplyForm from '../../../components/ApplyForm.astro';
+import { SITE } from '../../../config';
+import { getCollection, render } from 'astro:content';
+
+const { job } = Astro.props;
+const { Content } = await render(job);
+const d = job.data;
+const isClosingSoon = d.status === 'closing-soon';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const enUrl = new URL(`/jobs/${job.id}/`, Astro.site).href;
+
+const employmentTypes: Record<string, string> = {
+  'Full-time': 'FULL_TIME',
+  'Part-time': 'PART_TIME',
+  Contract: 'CONTRACTOR',
+  Temporary: 'TEMPORARY',
+  Internship: 'INTERN',
+};
+
+const typeLabels: Record<string, string> = {
+  'Full-time': 'دوام كامل',
+  'Part-time': 'دوام جزئي',
+  Contract: 'عقد',
+  Temporary: 'مؤقت',
+  Internship: 'تدريب',
+};
+
+const modeLabels: Record<string, string> = {
+  'On-site': 'من مقر الشركة',
+  Hybrid: 'دوام هجين',
+  Remote: 'عن بُعد',
+};
+
+const escapeHtml = (value: string) => value
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
+
+const respList = d.responsibilities.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+const reqList = d.requirements.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+
+const structuredDescription = `<p>${escapeHtml(d.summary)}</p><h2>المهام الرئيسية</h2><ul>${respList}</ul><h2>المتطلبات</h2><ul>${reqList}</ul>`;
+
+export async function getStaticPaths() {
+  const jobs = await getCollection('jobs-ar', ({ data }) => data.status !== 'closed');
+  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
+}
+
+const jsonLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'JobPosting',
+  title: d.titleEn ? `${d.title} (${d.titleEn})` : d.title,
+  description: structuredDescription,
+  identifier: { '@type': 'PropertyValue', name: SITE.name, value: d.code },
+  datePosted: d.datePosted,
+  employmentType: employmentTypes[d.type] ?? 'OTHER',
+  directApply: true,
+  url: canonicalUrl,
+  hiringOrganization: {
+    '@type': 'Organization',
+    name: SITE.name,
+    sameAs: SITE.mainSite,
+    logo: new URL('/assets/logo-dark.png', Astro.site).href,
+  },
+};
+
+if (d.validThrough) jsonLd.validThrough = `${d.validThrough}T23:59:59+03:00`;
+
+if (d.mode === 'Remote') {
+  jsonLd.jobLocationType = 'TELECOMMUTE';
+  jsonLd.applicantLocationRequirements = { '@type': 'Country', name: 'Saudi Arabia' };
+} else {
+  jsonLd.jobLocation = {
+    '@type': 'Place',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Jeddah',
+      addressCountry: 'SA',
+    },
+  };
+}
+---
+<BaseLayout
+  title={`${d.title} — وظائف عقار ون`}
+  description={`عقار ون توظف: ${d.title} في ${d.location}. ${typeLabels[d.type] ?? d.type}، ${modeLabels[d.mode] ?? d.mode}. قدّم الآن.`}
+  jsonLd={jsonLd}
+  lang="ar"
+  dir="rtl"
+  ogLocale="ar_SA"
+  alternates={[
+    { hreflang: 'ar', href: canonicalUrl },
+    { hreflang: 'en', href: enUrl },
+    { hreflang: 'x-default', href: enUrl },
+  ]}
+>
+  <section class="job-hero grid-backdrop">
+    <div class="container">
+      <div class="hero-meta">
+        <span class="eyebrow">{d.dept} · {d.code}</span>
+        <span class={`badge ${isClosingSoon ? 'badge-closing' : 'badge-open'}`}>
+          {isClosingSoon ? 'يُغلق قريبًا' : 'متاحة'}
+        </span>
+      </div>
+      <h1 class="display job-title">{d.title}</h1>
+      {d.titleEn && <div class="title-en" dir="ltr" lang="en">{d.titleEn}</div>}
+      <div class="hero-chips">
+        <span class="chip solid">{d.location}</span>
+        <span class="chip solid">{typeLabels[d.type] ?? d.type}</span>
+        <span class="chip solid">{modeLabels[d.mode] ?? d.mode}</span>
+        {d.experience && <span class="chip solid">{d.experience}</span>}
+      </div>
+      <p class="lang-switch"><a href={`/jobs/${job.id}/`} hreflang="en" lang="en">English version of this ad &larr;</a></p>
+    </div>
+  </section>
+
+  <section class="job-body">
+    <div class="container body-grid">
+      <article>
+        <h2 class="sub-h2">عن الوظيفة</h2>
+        <div class="body-lg muted about"><Content /></div>
+
+        <h2 class="sub-h2">المهام الرئيسية</h2>
+        <ol class="resp-list">
+          {d.responsibilities.map((responsibility, index) => (
+            <li>
+              <span class="resp-num">{String(index + 1).padStart(2, '0')}</span>
+              <span>{responsibility}</span>
+            </li>
+          ))}
+        </ol>
+
+        <h2 class="sub-h2">المتطلبات</h2>
+        <ul class="req-list">
+          {d.requirements.map((requirement) => <li>{requirement}</li>)}
+        </ul>
+
+        <ApplyForm jobTitle={d.title} jobCode={d.code} locale="ar" />
+      </article>
+
+      <aside class="card summary-card" aria-label="ملخص الوظيفة">
+        <div class="code sum-code">{d.code}</div>
+        <div class="sum-row"><span>القسم</span><strong>{d.dept}</strong></div>
+        <div class="sum-row"><span>الموقع</span><strong>{d.location}</strong></div>
+        <div class="sum-row"><span>نوع الدوام</span><strong>{typeLabels[d.type] ?? d.type} · {modeLabels[d.mode] ?? d.mode}</strong></div>
+        {d.experience && <div class="sum-row"><span>الخبرة</span><strong>{d.experience}</strong></div>}
+        <a href="#apply" class="btn btn-primary sum-btn">قدّم على هذه الوظيفة</a>
+        <a href={`mailto:${SITE.hrEmail}?subject=${encodeURIComponent(`Application ${d.code}`)}`} class="btn btn-secondary sum-btn-2">أرسل سيرتك الذاتية بالبريد</a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .job-hero { padding-block: var(--space-8) var(--space-7); border-bottom: 1px solid var(--line); }
+  .hero-meta { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .job-title { font-size: clamp(2.2rem, 4vw, 3.5rem); max-width: 20ch; margin-bottom: var(--space-2); }
+  .title-en { font-size: 1.125rem; font-weight: 600; color: var(--ink-3); margin-bottom: var(--space-5); text-align: start; }
+  .hero-chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .chip.solid { background: var(--surface); border-color: var(--line-strong); padding: 6px 16px; }
+  .lang-switch { margin-top: var(--space-4); font-size: 0.9375rem; }
+  .lang-switch a { color: var(--bronze-deep); font-weight: 600; }
+
+  .job-body { padding-block: var(--space-8) var(--space-9); }
+  .body-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--space-8); align-items: start; }
+  article { max-width: 72ch; min-width: 0; }
+
+  .sub-h2 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: 0 0 var(--space-5); }
+  .about { margin-bottom: var(--space-7); }
+  .about :global(p) { margin: 0; }
+
+  .resp-list { list-style: none; margin: 0 0 var(--space-7); padding: 0; }
+  .resp-list li { display: flex; gap: var(--space-4); align-items: baseline; padding-block: var(--space-3); border-bottom: 1px solid var(--line); }
+  .resp-num { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--bronze); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+  .req-list { list-style: none; margin: 0 0 var(--space-7); padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .req-list li { display: flex; gap: var(--space-3); align-items: baseline; }
+  .req-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--bronze); flex-shrink: 0; }
+
+  .summary-card { position: sticky; top: 96px; }
+  .sum-code { padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .sum-row { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: 14px; border-bottom: 1px solid var(--line); }
+  .sum-row span { font-size: 0.8125rem; font-weight: 600; color: var(--ink-3); }
+  .sum-row strong { font-size: 0.9375rem; font-weight: 600; text-align: end; }
+  .sum-btn { margin-top: var(--space-5); width: 100%; }
+  .sum-btn-2 { margin-top: var(--space-3); width: 100%; }
+
+  @media (max-width: 1023px) {
+    .body-grid { grid-template-columns: 1fr; }
+    .summary-card { position: static; order: -1; }
+  }
+</style>
