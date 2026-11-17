@@ -4,7 +4,7 @@ import ApplyForm from '../../components/ApplyForm.astro';
 import { SITE } from '../../config';
 import { getCollection, render } from 'astro:content';
 
-const { job } = Astro.props;
+const { job, hasArabic = false } = Astro.props;
 const { Content } = await render(job);
 const d = job.data;
 const isClosingSoon = d.status === 'closing-soon';
@@ -32,7 +32,9 @@ const structuredDescription = `<p>${escapeHtml(d.summary)}</p><h2>Key responsibi
 
 export async function getStaticPaths() {
   const jobs = await getCollection('jobs', ({ data }) => data.status !== 'closed');
-  return jobs.map((job) => ({ params: { slug: job.id }, props: { job } }));
+  const arJobs = await getCollection('jobs-ar', ({ data }) => data.status !== 'closed');
+  const arSlugs = new Set(arJobs.map((j) => j.id));
+  return jobs.map((job) => ({ params: { slug: job.id }, props: { job, hasArabic: arSlugs.has(job.id) } }));
 }
 
 const jsonLd: Record<string, unknown> = {
@@ -89,6 +91,7 @@ if (d.mode === 'Remote') {
         <span class="chip solid">{d.mode}</span>
         {d.experience && <span class="chip solid">{d.experience}</span>}
       </div>
+      {hasArabic && <p class="lang-switch"><a href={`/ar/jobs/${job.id}/`} hreflang="ar" lang="ar">النسخة العربية من الإعلان ←</a></p>}
     </div>
   </section>
 
@@ -134,6 +137,8 @@ if (d.mode === 'Remote') {
   .hero-meta { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
   .job-title { font-size: clamp(2.2rem, 4vw, 3.5rem); max-width: 20ch; margin-bottom: var(--space-5); }
   .hero-chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .lang-switch { margin-top: var(--space-4); font-size: 0.9375rem; }
+  .lang-switch a { color: var(--bronze-deep); font-weight: 600; }
   .chip.solid { background: var(--surface); border-color: var(--line-strong); padding: 6px 16px; }
 
   .job-body { padding-block: var(--space-8) var(--space-9); }
